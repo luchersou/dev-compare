@@ -2,15 +2,11 @@ import type { Metadata } from "next";
 import {
   Poppins,
   Libre_Baskerville,
-  IBM_Plex_Mono
-} from "next/font/google";
+  IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-sans",
-});
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const libre = Libre_Baskerville({
   subsets: ["latin"],
@@ -36,12 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`
-        ${poppins.variable}
-        ${libre.variable}
-        ${mono.variable}
-        h-full antialiased
-      `}
+      className={cn("h-full", "antialiased", libre.variable, mono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
