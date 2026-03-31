@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import {
-  Poppins,
-  Libre_Baskerville,
-  IBM_Plex_Mono, Inter } from "next/font/google";
+import { DM_Sans, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { QueryProvider } from "@/providers/query-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
-
-const libre = Libre_Baskerville({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-serif",
+  variable: "--font-sans",
 });
 
-const mono = IBM_Plex_Mono({
+const spaceMono = Space_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "700"],
   variable: "--font-mono",
 });
 
@@ -32,9 +29,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", libre.variable, mono.variable, "font-sans", inter.variable)}
+      className={cn("h-full antialiased", dmSans.variable, spaceMono.variable)}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            {children}
+          </QueryProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
