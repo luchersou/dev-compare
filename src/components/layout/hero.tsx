@@ -2,6 +2,8 @@
 
 import { motion } from "motion/react";
 import { SearchBar } from "@/components/search/search-bar";
+import { cn } from "@/lib/utils";
+import { DotPattern } from "../ui/dot-pattern";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -12,12 +14,7 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden">
 
-      {/* GRID */}
-      <div className="bg-grid absolute inset-0" />
-
-      {/* BLOBS */}
-      <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-accent opacity-20 blur-3xl" />
-      <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-accent opacity-10 blur-3xl" />
+      
 
       {/* CONTENT */}
       <motion.div
@@ -29,27 +26,27 @@ export function Hero() {
 
         {/* Badge */}
         <motion.div variants={fadeUp} transition={{ duration: 0.5 }}>
-          <span className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+          <span className="relative font-mono text-xs tracking-widest text-muted-foreground uppercase border border-border rounded-full px-3 py-1">
             npm intelligence
           </span>
         </motion.div>
 
-        {/* Title — serif no destaque, sans no resto */}
+        {/* Title */}
         <motion.h1
           variants={fadeUp}
           transition={{ duration: 0.6 }}
-          className="mt-4 text-5xl tracking-tight text-foreground md:text-7xl"
+          className="mt-4 text-5xl tracking-tighter text-foreground md:text-7xl"
         >
           <span className="font-sans font-semibold">Compare</span>{" "}
-          <em className="font-serif font-normal italic text-primary not-italic">
+          <em className="font-serif font-normal italic text-primary">
             npm packages
           </em>
-          <span className="mt-2 block font-sans font-semibold text-muted-foreground">
+          <span className="mt-2 block font-sans font-semibold bg-gradient-to-r from-muted-foreground to-muted-foreground/30 bg-clip-text text-transparent">
             side by side
           </span>
         </motion.h1>
 
-        {/* Divider decorativo */}
+        {/* Divider */}
         <motion.div
           variants={fadeUp}
           transition={{ duration: 0.5 }}
