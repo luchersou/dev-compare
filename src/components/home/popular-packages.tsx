@@ -4,25 +4,22 @@ import { motion } from "motion/react"
 import { TrendingUp } from "lucide-react"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
-import { PackageCard } from "@/components/package/package-card"
-import { usePopular } from "@/features/package/hooks/use-popular"
-import { PackageCardSkeleton } from "@/components/package/package-card-skeleton"
-import type { PackageDetails } from "@/types/global"
-import { ErrorState } from "../shared/error-state"
+import { PackageCard } from "@/components/home/package-card"
+import type { PackageSummary } from "@/types/global"
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0 },
 }
 
-export function PopularPackages() {
-  const { data: packages, isLoading, isError, refetch } = usePopular()
+interface PopularPackagesProps {
+  data: PackageSummary[]
+}
 
+export function PopularPackages({ data }: PopularPackagesProps) {
   return (
     <Section>
       <Container>
-
-        {/* Header */}
         <motion.div
           className="mb-10 flex flex-col gap-2"
           initial="hidden"
@@ -58,51 +55,31 @@ export function PopularPackages() {
           </motion.p>
         </motion.div>
 
-        {/* Error */}
-        {isError && (
-          <ErrorState
-            message="Failed to load trending packages."
-            onRetry={refetch}
-          />
-        )}
-
-        {/* Grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-
-          {/* Skeleton */}
-          {isLoading &&
-            Array.from({ length: 6 }).map((_, i) => (
-              <PackageCardSkeleton key={i} />
+          <motion.div
+            className="contents"
+            initial="hidden"
+            animate="visible"
+            transition={{ staggerChildren: 0.08 }}
+          >
+            {data.map((pkg) => (
+              <motion.div
+                key={pkg.name}
+                variants={fadeUp}
+                transition={{ duration: 0.4 }}
+                className="h-full"
+              >
+                <PackageCard
+                  name={pkg.name}
+                  version={pkg.version ?? "—"}
+                  description={pkg.description ?? "No description available."}
+                  weeklyDownloads={pkg.weeklyDownloads ?? 0}
+                  gzipSize={pkg.gzipSize ?? 0}
+                  stars={pkg.stars ?? 0}
+                />
+              </motion.div>
             ))}
-
-          {/* Data */}
-          {!isLoading && packages && (
-            <motion.div
-              className="contents"
-              initial="hidden"
-              animate="visible"
-              transition={{ staggerChildren: 0.08 }}
-            >
-              {packages.map((pkg: PackageDetails) => (
-                <motion.div
-                  key={pkg.name}
-                  variants={fadeUp}
-                  transition={{ duration: 0.4 }}
-                  className="h-full"
-                >
-                  <PackageCard
-                    name={pkg.name}
-                    version={pkg.version ?? "—"}
-                    description={pkg.description ?? "No description available."}
-                    weeklyDownloads={pkg.downloads ?? 0}
-                    gzipSize={pkg.bundle?.gzip ?? 0}
-                    stars={pkg.github?.stars ?? 0}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-
+          </motion.div>
         </div>
       </Container>
     </Section>

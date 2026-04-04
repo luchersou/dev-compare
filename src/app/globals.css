@@ -55,6 +55,13 @@
   --shadow-2xl: 0px 0px 0px 0px hsl(0 0% 10.1961% / 0.13);
   --tracking-normal: normal;
   --spacing: 0.25rem;
+
+  --gradient-accent-1: oklch(0.65 0.25 330);
+  --gradient-accent-2: oklch(0.7 0.23 20);
+  --gradient-accent-3: oklch(0.85 0.2 90);
+  --gradient-accent-4: oklch(0.75 0.22 150);
+  --gradient-accent-5: oklch(0.7 0.22 220);
+  --gradient-accent-6: oklch(0.65 0.24 280);
 }
 
 .dark {
@@ -168,62 +175,81 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+  --color-gradient-accent-1: var(--gradient-accent-1);
+  --color-gradient-accent-2: var(--gradient-accent-2);
+  --color-gradient-accent-3: var(--gradient-accent-3);
+  --color-gradient-accent-4: var(--gradient-accent-4);
+  --color-gradient-accent-5: var(--gradient-accent-5);
+  --color-gradient-accent-6: var(--gradient-accent-6);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
   html {
     @apply font-sans;
-  }
-
-  html::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    --grid-color: rgba(0, 0, 0, 0.07);
-    background-image:
-      linear-gradient(var(--grid-color) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, black 100%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, black 100%);
-  }
-
-  html.dark::before {
-    --grid-color: rgba(255, 255, 255, 0.06);
   }
 
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
+
     background-color: hsl(var(--background));
     background-image:
       radial-gradient(ellipse 70% 55% at 50% -5%,  hsl(var(--foreground) / 0.06) 0%, transparent 70%),
       radial-gradient(ellipse 60% 50% at 50% 108%, hsl(var(--foreground) / 0.05) 0%, transparent 70%),
       radial-gradient(ellipse 50% 40% at -5%  50%, hsl(var(--foreground) / 0.03) 0%, transparent 70%),
       radial-gradient(ellipse 50% 40% at 105% 50%, hsl(var(--foreground) / 0.03) 0%, transparent 70%);
+
     background-attachment: fixed;
   }
+}
 
-  body::before {
-    content: "";
+@layer components {
+  .bg-grid-overlay {
     position: fixed;
     inset: 0;
-    z-index: 10;
     pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 128px 128px;
+    z-index: 0;
+
+    --grid-color: rgba(0, 0, 0, 0.08);
+
+    background-image:
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+
+    mask-image: radial-gradient(
+      ellipse 80% 80% at 50% 50%,
+      transparent 30%,
+      black 100%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 80% 80% at 50% 50%,
+      transparent 30%,
+      black 100%
+    );
   }
 
-  body::after {
-    content: "";
+  .dark .bg-grid-overlay {
+    --grid-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .bg-noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.035;
+
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+
+    background-repeat: repeat;
+    background-size: 128px 128px;
+
+    animation: grainShift 8s steps(10) infinite;
+  }
+
+  .bg-glow-overlay {
     position: fixed;
     top: -60px;
     left: 50%;
@@ -231,15 +257,38 @@
     width: 65%;
     height: 160px;
     border-radius: 50%;
+
     background: conic-gradient(
       from 200deg at 50% 100%,
-      #ff0080, #ff6600, #ffdd00, #00ff88, #00aaff, #8855ff, #ff0080
+      var(--color-gradient-accent-1),
+      var(--color-gradient-accent-2),
+      var(--color-gradient-accent-3),
+      var(--color-gradient-accent-4),
+      var(--color-gradient-accent-5),
+      var(--color-gradient-accent-6),
+      var(--color-gradient-accent-1)
     );
+
     filter: blur(28px);
     opacity: 0.28;
     pointer-events: none;
     z-index: 1;
+
     animation: arcShift 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes grainShift {
+    0%   { transform: translate(0, 0); }
+    10%  { transform: translate(-1%, -1%); }
+    20%  { transform: translate(1%, 1%); }
+    30%  { transform: translate(-1%, 1%); }
+    40%  { transform: translate(1%, -1%); }
+    50%  { transform: translate(-0.5%, 0.5%); }
+    60%  { transform: translate(0.5%, -0.5%); }
+    70%  { transform: translate(-0.5%, -0.5%); }
+    80%  { transform: translate(0.5%, 0.5%); }
+    90%  { transform: translate(-0.25%, 0.25%); }
+    100% { transform: translate(0, 0); }
   }
 
   @keyframes arcShift {
@@ -247,26 +296,10 @@
     50%  { opacity: 0.32; width: 68%; top: -55px; }
     100% { opacity: 0.24; width: 63%; top: -60px; }
   }
-}
 
-@layer components {
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, color-mix(in srgb, currentColor 4%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in srgb, currentColor 4%, transparent) 1px, transparent 1px);
-    background-size: 24px 24px;
-    mask-image: radial-gradient(
-      ellipse 100% 80% at 50% 0%,
-      black 50%,
-      transparent 100%
-    );
-  }
-
-  :root .bg-grid {
-    color: #000;
-  }
-
-  .dark .bg-grid {
-    color: #fff;
+  @media (prefers-reduced-motion: reduce) {
+    .bg-noise-overlay {
+      animation: none;
+    }
   }
 }

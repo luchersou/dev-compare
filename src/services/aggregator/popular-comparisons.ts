@@ -1,18 +1,19 @@
-import { fetchDownloads } from "@/services/api/downloads"
-import { fetchBundle } from "@/services/api/bundlephobia"
+import type { ComparisonCardData } from "@/types/compare"
 import { POPULAR_COMPARISONS } from "@/config/popular-comparisons"
-import { ComparisonCardData, PackageSnapshot } from "@/types/compare"
+import { fetchDownloadsByPeriod } from "@/services/api/downloads"
+import { fetchBundle } from "@/services/api/bundlephobia"
+import type { PackageSnapshot } from "@/types/compare"
 
 async function fetchPackageSnapshot(name: string): Promise<PackageSnapshot> {
   const [downloads, bundle] = await Promise.allSettled([
-    fetchDownloads(name),
+    fetchDownloadsByPeriod(name, "last-week"),
     fetchBundle(name),
   ])
 
   return {
     name,
     downloads:
-      downloads.status === "fulfilled" ? (downloads.value?.downloads ?? null) : null,
+      downloads.status === "fulfilled" ? (downloads.value ?? null) : null,
     bundleSize:
       bundle.status === "fulfilled" ? (bundle.value?.gzip ?? null) : null,
   }

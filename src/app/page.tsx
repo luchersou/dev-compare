@@ -1,19 +1,26 @@
-import { HowItWorks } from "@/components/home/how-it-works";
-import { PopularComparisons } from "@/components/home/popular-comparisons";
-import { PopularPackages } from "@/components/home/popular-packages";
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
-import { Hero } from "@/components/layout/hero";
+import { HowItWorks } from "@/components/home/how-it-works"
+import { PopularComparisons } from "@/components/home/popular-comparisons"
+import { PopularPackages } from "@/components/home/popular-packages"
+import { BackgroundEffects } from "@/components/layout/background-effects"
+import { Footer } from "@/components/layout/footer"
+import { Hero } from "@/components/layout/hero"
+import { fetchPopularComparisons } from "@/services/aggregator/popular-comparisons"
+import { fetchPopularPackages } from "@/services/aggregator/package-summary"
 
-export default function Home() {
+export default async function Home() {
+  const [comparisons, packages] = await Promise.all([
+    fetchPopularComparisons(),
+    fetchPopularPackages(),
+  ]);
+
   return (
-    <>
-      <Header />
+    <main className="relative">
+      <BackgroundEffects glow/>
       <Hero />
-      <PopularPackages />
-      <PopularComparisons />
+      <PopularPackages data={packages} />
+      <PopularComparisons data={comparisons} />
       <HowItWorks />
       <Footer />
-    </>
+    </main>
   );
 }

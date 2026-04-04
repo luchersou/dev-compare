@@ -99,16 +99,16 @@ export function PackageCard({
       </CardContent>
 
       <CardFooter className="pt-3 border-t border-border">
-      <Button
-        size="sm"
-        variant={isSelected ? "secondary" : "outline"}
-        className="gap-1.5 text-xs w-full"
-        onClick={onAddToCompare}
-      >
-        <Plus className="h-3 w-3" />
-        {isSelected ? "Added" : "Compare"}
-      </Button>
-    </CardFooter>
+        <Button
+          size="sm"
+          variant={isSelected ? "secondary" : "outline"}
+          className="gap-1.5 text-xs w-full"
+          onClick={onAddToCompare}
+        >
+          <Plus className="h-3 w-3" />
+          {isSelected ? "Added" : "Compare"}
+        </Button>
+      </CardFooter>
 
     </Card>
   )

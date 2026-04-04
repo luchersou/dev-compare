@@ -3,15 +3,7 @@ import { fetchDownloads } from "@/services/api/downloads"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchGithubRepo } from "@/services/api/github"
 import { PackageDetails } from "@/types/global"
-
-function extractGithubRepo(url?: string) {
-  if (!url) return null
-
-  return url
-    .replace("git+", "")
-    .replace(".git", "")
-    .replace("https://github.com/", "")
-}
+import { extractGithubRepo } from "@/lib/github"
 
 export async function getPackageDetails(
   name: string
@@ -36,7 +28,13 @@ export async function getPackageDetails(
     description: npmData.description,
     version: npmData["dist-tags"]?.latest,
 
-    downloads: downloads?.downloads,
+    downloads: downloads
+    ? {
+        weekly: downloads.weekly,
+        monthly: downloads.monthly,
+        yearly: downloads.yearly,
+      }
+    : undefined,
 
     bundle: bundle
       ? {

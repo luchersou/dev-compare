@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { Header } from "@/components/layout/header";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -29,9 +30,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("h-full antialiased", dmSans.variable, spaceMono.variable)}
     >
       <body className="min-h-full flex flex-col font-sans">
+        <Header />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

@@ -12,7 +12,7 @@ import {
   CommandEmpty,
 } from "@/components/ui/command";
 
-import { useSearch } from "@/features/search/hooks/use-search";
+import { useSearch } from "@/features/search/use-search";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SearchItem } from "./search-item";
 import { SearchSkeleton } from "./search-skeleton";

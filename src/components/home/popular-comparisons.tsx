@@ -2,26 +2,26 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { usePopularComparisons } from "@/features/compare/hooks/use-popular-comparisons"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { ComparisonCard } from "./comparison-card"
-import { ComparisonCardSkeleton } from "./comparison-card-skeleton"
-import { ErrorState } from "@/components/shared/error-state"
-import { POPULAR_COMPARISONS } from "@/config/popular-comparisons"
 import { Section } from "@/components/layout/section"
 import { Container } from "@/components/layout/container"
+import type { ComparisonCardData } from "@/types/compare"
 
 const INITIAL_VISIBLE_DESKTOP = 6
 const INITIAL_VISIBLE_MOBILE = 3
 
-export function PopularComparisons() {
-  const { data, isLoading, isError, refetch } = usePopularComparisons()
+interface PopularComparisonsProps {
+  data: ComparisonCardData[]
+}
+
+export function PopularComparisons({ data }: PopularComparisonsProps) {
   const [expanded, setExpanded] = useState(false)
   const isMobile = useMediaQuery("(max-width: 640px)")
 
   const visibleCount = isMobile ? INITIAL_VISIBLE_MOBILE : INITIAL_VISIBLE_DESKTOP
-  const visible = expanded ? (data ?? []) : (data ?? []).slice(0, visibleCount)
-  const hasMore = (data?.length ?? 0) > visibleCount
+  const visible = expanded ? data : data.slice(0, visibleCount)
+  const hasMore = data.length > visibleCount
 
   return (
     <Section>
@@ -36,36 +36,19 @@ export function PopularComparisons() {
           </p>
         </div>
 
-        {isError && (
-          <ErrorState
-            message="Failed to load popular comparisons"
-            onRetry={refetch}
-          />
-        )}
-
-        {isLoading && (
+        <div className="relative">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: POPULAR_COMPARISONS.length }).map((_, i) => (
-              <ComparisonCardSkeleton key={i} />
+            {visible.map((item) => (
+              <ComparisonCard key={`${item.pair.a}-${item.pair.b}`} data={item} />
             ))}
           </div>
-        )}
 
-        {!isLoading && !isError && (
-          <div className="relative">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visible.map((item) => (
-                <ComparisonCard key={`${item.pair.a}-${item.pair.b}`} data={item} />
-              ))}
-            </div>
+          {hasMore && !expanded && (
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+          )}
+        </div>
 
-            {hasMore && !expanded && (
-              <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-            )}
-          </div>
-        )}
-
-        {!isLoading && !isError && hasMore && (
+        {hasMore && (
           <div className="flex justify-center mt-2">
             <Button
               variant="outline"
