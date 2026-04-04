@@ -4,7 +4,7 @@ import { Download, Plus, Star, Weight } from "lucide-react"
 import { formatDownloads, formatSize, formatStars } from "@/lib/utils"
 import { generateIconColor } from "@/lib/utils"
 
-type PackageCardProps = {
+interface PackageCardProps {
   name: string
   version: string
   description: string
@@ -109,7 +109,6 @@ export function PackageCard({
           {isSelected ? "Added" : "Compare"}
         </Button>
       </CardFooter>
-
     </Card>
   )
 }

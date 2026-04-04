@@ -6,6 +6,7 @@ import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
 import { PackageCard } from "@/components/home/package-card"
 import type { PackageSummary } from "@/types/global"
+import { useCompareStore } from "@/store/compare.store"
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -17,6 +18,8 @@ interface PopularPackagesProps {
 }
 
 export function PopularPackages({ data }: PopularPackagesProps) {
+  const { packages, addPackage, removePackage } = useCompareStore()
+  
   return (
     <Section>
       <Container>
@@ -76,6 +79,12 @@ export function PopularPackages({ data }: PopularPackagesProps) {
                   weeklyDownloads={pkg.weeklyDownloads ?? 0}
                   gzipSize={pkg.gzipSize ?? 0}
                   stars={pkg.stars ?? 0}
+                  isSelected={packages.includes(pkg.name)}
+                  onAddToCompare={() =>
+                    packages.includes(pkg.name)
+                      ? removePackage(pkg.name)
+                      : addPackage(pkg.name)
+                  }
                 />
               </motion.div>
             ))}

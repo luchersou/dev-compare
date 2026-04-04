@@ -5,4 +5,5 @@ export interface GitHubRepo {
   open_issues_count: number
   html_url: string
   description: string
+  pushed_at: string
 }

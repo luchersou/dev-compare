@@ -1,5 +1,8 @@
 import { BackgroundEffects } from "@/components/layout/background-effects"
+import { BundleDetails } from "@/components/package/bundle-details"
+import { DownloadsChart } from "@/components/package/downloads-chart"
 import { PackageHero } from "@/components/package/package-hero"
+import { PackageMetadata } from "@/components/package/package-metadata"
 import { StatsGrid } from "@/components/package/stats-grid"
 import { getPackageDetails } from "@/services/aggregator/package-details"
 import { notFound } from "next/navigation"
@@ -22,9 +25,12 @@ export default async function PackagePage({ params }: PackagePageProps) {
 
   return (
     <main>
-        <BackgroundEffects />
+      <BackgroundEffects />
       <PackageHero pkg={pkg} />
       <StatsGrid pkg={pkg} />
+      <DownloadsChart pkg={pkg} />
+      <PackageMetadata pkg={pkg} />
+      <BundleDetails pkg={pkg} />
     </main>
   )
 }

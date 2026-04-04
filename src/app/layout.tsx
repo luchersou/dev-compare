@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Header } from "@/components/layout/header";
+import { CompareFloatingBar } from "@/components/global/compare-floating-bar";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -34,15 +35,18 @@ export default function RootLayout({
       className={cn("h-full antialiased", dmSans.variable, spaceMono.variable)}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <Header />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem={false}
           disableTransitionOnChange
         >
+          <Header />
           <QueryProvider>
-            {children}
+            <CompareFloatingBar />
+            <div className="pt-16">
+              {children}
+            </div>
           </QueryProvider>
         </ThemeProvider>
       </body>

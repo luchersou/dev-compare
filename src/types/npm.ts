@@ -19,7 +19,9 @@ export interface NpmVersion {
   keywords?: string[]
   homepage?: string
   license?: string
+  author?: string | { name: string; email?: string }  
   dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
 }
 
 export interface NpmSearchResult {

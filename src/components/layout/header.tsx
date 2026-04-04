@@ -20,7 +20,7 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300",
+        "fixed left-1/2 -translate-x-1/2 z-40 transition-all duration-300",
         scrolled
           ? "top-4 w-[95%] max-w-6xl rounded-2xl border border-border bg-background/70 backdrop-blur-xl shadow-lg"
           : "top-0 w-full bg-transparent"

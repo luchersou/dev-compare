@@ -14,11 +14,9 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden">
 
-      
-
       {/* CONTENT */}
       <motion.div
-        className="relative z-10 mx-auto max-w-5xl px-6 py-32 text-center"
+        className="relative z-30 mx-auto max-w-5xl px-6 py-32 text-center"
         initial="hidden"
         animate="visible"
         transition={{ staggerChildren: 0.15 }}

@@ -9,6 +9,8 @@ import {
   FileCode,
   Zap,
 } from "lucide-react"
+import { Container } from "../layout/container"
+import { Section } from "../layout/section"
 
 interface StatsGridProps {
   pkg: PackageDetails
@@ -90,15 +92,17 @@ export function StatsGrid({ pkg }: StatsGridProps) {
   ]
 
   return (
-    <section className="container py-8">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
-        Stats
-      </h2>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <StatCard key={stat.label} {...stat} />
-        ))}
-      </div>
-    </section>
+    <Section>
+      <Container>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
+          Stats
+        </h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <StatCard key={stat.label} {...stat} />
+          ))}
+        </div>
+      </Container>
+    </Section>
   )
 }

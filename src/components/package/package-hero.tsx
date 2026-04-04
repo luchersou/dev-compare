@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useCompareStore } from "@/store/compare.store"
 import type { PackageDetails } from "@/types/global"
-import { GithubIcon } from "../shared/icons"
+import { GithubIcon } from "@/components/shared/icons"
+import { Container } from "../layout/container"
 import {
   ExternalLink,
   Plus,
@@ -13,7 +14,6 @@ import {
   Scale,
   User,
   GitBranch,
-  Container,
 } from "lucide-react"
 import Link from "next/link"
 

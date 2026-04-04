@@ -16,7 +16,7 @@ export function Section({ children, className, divider = true }: SectionProps) {
         ` : ""}
       `}
     >
-      <div className="relative z-10">
+      <div className="relative z-30">
         {children}
       </div>
     </section>
