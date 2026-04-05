@@ -6,6 +6,11 @@ import { Footer } from "@/components/layout/footer"
 import { Hero } from "@/components/layout/hero"
 import { fetchPopularComparisons } from "@/services/aggregator/popular-comparisons"
 import { fetchPopularPackages } from "@/services/aggregator/package-summary"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "DevCompare — Compare npm packages",
+}
 
 export default async function Home() {
   const [comparisons, packages] = await Promise.all([

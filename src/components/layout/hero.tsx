@@ -2,8 +2,6 @@
 
 import { motion } from "motion/react";
 import { SearchBar } from "@/components/search/search-bar";
-import { cn } from "@/lib/utils";
-import { DotPattern } from "../ui/dot-pattern";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },

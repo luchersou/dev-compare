@@ -1,36 +1,19 @@
+import { Suspense } from "react"
 import { BackgroundEffects } from "@/components/layout/background-effects"
-import { BundleDetails } from "@/components/package/bundle-details"
-import { DownloadsChart } from "@/components/package/downloads-chart"
-import { PackageHero } from "@/components/package/package-hero"
-import { PackageMetadata } from "@/components/package/package-metadata"
-import { StatsGrid } from "@/components/package/stats-grid"
-import { getPackageDetails } from "@/services/aggregator/package-details"
-import { notFound } from "next/navigation"
+import { PackageContent } from "@/components/package/package-content"
+import { PackageContentSkeleton } from "@/components/package/package-content-skeleton"
 
 interface PackagePageProps {
   params: Promise<{ name: string }>
 }
 
-export default async function PackagePage({ params }: PackagePageProps) {
-  const { name } = await params
-  const decodedName = decodeURIComponent(name)
-
-  let pkg
-
-  try {
-    pkg = await getPackageDetails(decodedName)
-  } catch {
-    notFound()
-  }
-
+export default function PackagePage({ params }: PackagePageProps) {
   return (
     <main>
       <BackgroundEffects />
-      <PackageHero pkg={pkg} />
-      <StatsGrid pkg={pkg} />
-      <DownloadsChart pkg={pkg} />
-      <PackageMetadata pkg={pkg} />
-      <BundleDetails pkg={pkg} />
+      <Suspense fallback={<PackageContentSkeleton />}>
+        <PackageContent params={params} />
+      </Suspense>
     </main>
   )
 }
@@ -40,14 +23,13 @@ export async function generateMetadata({ params }: PackagePageProps) {
   const decodedName = decodeURIComponent(name)
 
   try {
+    const { getPackageDetails } = await import("@/services/aggregator/package-details")
     const pkg = await getPackageDetails(decodedName)
     return {
-      title: `${pkg.name} — npmview`,
+      title: `${pkg.name} — DevCompare`,
       description: pkg.description,
     }
   } catch {
-    return {
-      title: "Package not found — npmview",
-    }
+    return { title: "Package not found — DevCompare" }
   }
 }
