@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { CompareContent } from "@/components/compare/compare-content"
 import { CompareContentSkeleton } from "@/components/compare/compare-content-skeleton"
+import { BackgroundEffects } from "@/components/layout/background-effects";
 
 interface ComparePageProps {
   searchParams: Promise<{ a?: string; b?: string }>
@@ -9,6 +10,7 @@ interface ComparePageProps {
 export default function ComparePage({ searchParams }: ComparePageProps) {
   return (
     <main>
+      <BackgroundEffects />
       <Suspense fallback={<CompareContentSkeleton />}>
         <CompareContent searchParams={searchParams} />
       </Suspense>

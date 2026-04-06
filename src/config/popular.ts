@@ -5,7 +5,6 @@ export const POPULAR_PACKAGES = [
   "zod",
   "tailwindcss",
   "axios",
-  "lodash",
   "express",
   "vite",
   "prisma",

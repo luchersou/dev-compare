@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Download, Plus, Star, Weight } from "lucide-react"
@@ -9,8 +10,9 @@ interface PackageCardProps {
   version: string
   description: string
   weeklyDownloads: number
-  gzipSize: number // bytes
+  gzipSize: number
   stars: number
+  href: string
   onAddToCompare?: () => void
   isSelected?: boolean
 }
@@ -36,18 +38,22 @@ export function PackageCard({
   weeklyDownloads,
   gzipSize,
   stars,
+  href,
   onAddToCompare,
   isSelected = false,
 }: PackageCardProps) {
   return (
-    <Card className={`flex flex-col transition-colors h-full ${isSelected ? "border-primary" : ""}`}>
+    <Card className={`flex flex-col transition-colors h-full hover:bg-accent/30 ${isSelected ? "border-primary" : ""}`}>
 
       <CardHeader className="pb-3">
-        <div className="flex items-start gap-3">
+        <Link
+          href={href}
+          className="flex items-start gap-3 group w-fit"
+        >
           <PackageIcon name={name} />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-semibold text-foreground truncate">
+              <span className="font-mono text-sm font-semibold text-foreground truncate group-hover:text-primary group-hover:underline transition-colors">
                 {name}
               </span>
             </div>
@@ -55,16 +61,14 @@ export function PackageCard({
               v{version}
             </span>
           </div>
-        </div>
+        </Link>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4 flex-1 justify-between">
-        {/* Description */}
         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
           {description}
         </p>
 
-        {/* Stats */}
         <div className="grid grid-cols-3 gap-2">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1 text-muted-foreground">

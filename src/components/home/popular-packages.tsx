@@ -1,12 +1,23 @@
 "use client"
 
 import { motion } from "motion/react"
-import { TrendingUp } from "lucide-react"
+import { Package } from "lucide-react"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
 import { PackageCard } from "@/components/home/package-card"
 import type { PackageSummary } from "@/types/global"
 import { useCompareStore } from "@/store/compare.store"
+
+const MOBILE_VISIBLE_LIMIT = 6
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -35,9 +46,9 @@ export function PopularPackages({ data }: PopularPackagesProps) {
             transition={{ duration: 0.4 }}
             className="flex items-center gap-2"
           >
-            <TrendingUp className="h-4 w-4 text-primary" />
+            <Package className="h-4 w-4 text-primary" />
             <span className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-              this week
+              popular
             </span>
           </motion.div>
 
@@ -46,7 +57,7 @@ export function PopularPackages({ data }: PopularPackagesProps) {
             transition={{ duration: 0.5 }}
             className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl"
           >
-            Trending packages
+            Essential packages
           </motion.h2>
 
           <motion.p
@@ -54,42 +65,42 @@ export function PopularPackages({ data }: PopularPackagesProps) {
             transition={{ duration: 0.5 }}
             className="text-sm text-muted-foreground max-w-md"
           >
-            Most downloaded packages on npm in the last 7 days.
+            The most used packages in the JavaScript ecosystem, hand-picked for you to explore and compare.
           </motion.p>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-          <motion.div
-            className="contents"
-            initial="hidden"
-            animate="visible"
-            transition={{ staggerChildren: 0.08 }}
-          >
-            {data.map((pkg) => (
-              <motion.div
-                key={pkg.name}
-                variants={fadeUp}
-                transition={{ duration: 0.4 }}
-                className="h-full"
-              >
-                <PackageCard
-                  name={pkg.name}
-                  version={pkg.version ?? "—"}
-                  description={pkg.description ?? "No description available."}
-                  weeklyDownloads={pkg.weeklyDownloads ?? 0}
-                  gzipSize={pkg.gzipSize ?? 0}
-                  stars={pkg.stars ?? 0}
-                  isSelected={packages.includes(pkg.name)}
-                  onAddToCompare={() =>
-                    packages.includes(pkg.name)
-                      ? removePackage(pkg.name)
-                      : addPackage(pkg.name)
-                  }
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
+        <motion.div
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          {data.map((pkg, index) => (
+            <motion.div
+              key={pkg.name}
+              variants={fadeUp}
+              transition={{ duration: 0.4 }}
+              className={`h-full ${index >= MOBILE_VISIBLE_LIMIT ? "hidden sm:block" : ""}`}
+            >
+              <PackageCard
+                name={pkg.name}
+                version={pkg.version ?? "—"}
+                description={pkg.description ?? "No description available."}
+                weeklyDownloads={pkg.weeklyDownloads ?? 0}
+                gzipSize={pkg.gzipSize ?? 0}
+                stars={pkg.stars ?? 0}
+                href={`/package/${pkg.name}`}
+                isSelected={packages.includes(pkg.name)}
+                onAddToCompare={() =>
+                  packages.includes(pkg.name)
+                    ? removePackage(pkg.name)
+                    : addPackage(pkg.name)
+                }
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </Container>
     </Section>
   )

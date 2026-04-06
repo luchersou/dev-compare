@@ -52,7 +52,7 @@ export function HowItWorks() {
         </motion.div>
 
         {/* Steps grid */}
-        <div className="grid grid-cols-1 divide-y divide-border border border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-1 divide-y divide-border hover:bg-accent/30 border border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0 rounded-lg overflow-hidden">
           {STEPS.map((step, i) => (
             <motion.div
               key={step.title}

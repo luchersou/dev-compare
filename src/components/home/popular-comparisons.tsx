@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { motion } from "motion/react"
+import { GitCompare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { ComparisonCard } from "./comparison-card"
@@ -10,6 +12,20 @@ import type { ComparisonCardData } from "@/types/compare"
 
 const INITIAL_VISIBLE_DESKTOP = 6
 const INITIAL_VISIBLE_MOBILE = 3
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0 },
+}
 
 interface PopularComparisonsProps {
   data: ComparisonCardData[]
@@ -26,22 +42,58 @@ export function PopularComparisons({ data }: PopularComparisonsProps) {
   return (
     <Section>
       <Container>
-        <div className="mb-8">
-          <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-2">
-            Comparisons
-          </p>
-          <h2 className="text-2xl font-semibold tracking-tight">Popular comparisons</h2>
-          <p className="text-muted-foreground mt-1 text-sm">
+        <motion.div
+          className="mb-10 flex flex-col gap-2"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ staggerChildren: 0.1 }}
+        >
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.4 }}
+            className="flex items-center gap-2"
+          >
+            <GitCompare className="h-4 w-4 text-primary" />
+            <span className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
+              comparisons
+            </span>
+          </motion.div>
+
+          <motion.h2
+            variants={fadeUp}
+            transition={{ duration: 0.5 }}
+            className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl"
+          >
+            Popular comparisons
+          </motion.h2>
+
+          <motion.p
+            variants={fadeUp}
+            transition={{ duration: 0.5 }}
+            className="text-sm text-muted-foreground max-w-md"
+          >
             The most searched package comparisons this week
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         <div className="relative">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visible.map((item) => (
-              <ComparisonCard key={`${item.pair.a}-${item.pair.b}`} data={item} />
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {visible.map((item, index) => (
+              <motion.div
+                key={`${item.pair.a}-${item.pair.b}`}
+                variants={fadeUp}
+                transition={{ duration: 0.4, delay: index >= (isMobile ? INITIAL_VISIBLE_MOBILE : INITIAL_VISIBLE_DESKTOP) ? (index % 3) * 0.08 : 0 }}
+              >
+                <ComparisonCard data={item} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
           {hasMore && !expanded && (
             <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent pointer-events-none" />
