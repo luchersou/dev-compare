@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { Section } from "@/components/layout/section"
 import { Container } from "@/components/layout/container"
+import { Workflow } from "lucide-react"
 
 const STEPS = [
   {
@@ -38,7 +39,7 @@ export function HowItWorks() {
           className="mb-16"
         >
           <div className="mb-4 flex items-center gap-2">
-            <span className="h-[5px] w-[5px] rounded-full bg-muted-foreground/50" />
+            <Workflow className="h-4 w-4 text-primary" />
             <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               How it works
             </p>

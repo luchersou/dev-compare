@@ -1,10 +1,10 @@
 "use client"
 
 import { motion } from "motion/react"
-import { Package } from "lucide-react"
+import { Link, Package } from "lucide-react"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
-import { PackageCard } from "@/components/home/package-card"
+import { PackageCard } from "@/components/home/popular-package-card"
 import type { PackageSummary } from "@/types/global"
 import { useCompareStore } from "@/store/compare.store"
 
@@ -83,21 +83,31 @@ export function PopularPackages({ data }: PopularPackagesProps) {
               transition={{ duration: 0.4 }}
               className={`h-full ${index >= MOBILE_VISIBLE_LIMIT ? "hidden sm:block" : ""}`}
             >
-              <PackageCard
-                name={pkg.name}
-                version={pkg.version ?? "—"}
-                description={pkg.description ?? "No description available."}
-                weeklyDownloads={pkg.weeklyDownloads ?? 0}
-                gzipSize={pkg.gzipSize ?? 0}
-                stars={pkg.stars ?? 0}
-                href={`/package/${pkg.name}`}
-                isSelected={packages.includes(pkg.name)}
-                onAddToCompare={() =>
-                  packages.includes(pkg.name)
-                    ? removePackage(pkg.name)
-                    : addPackage(pkg.name)
-                }
-              />
+              <motion.div
+                key={pkg.name}
+                variants={fadeUp}
+                transition={{ duration: 0.4 }}
+                className={`h-full ${index >= MOBILE_VISIBLE_LIMIT ? "hidden sm:block" : ""}`}
+              >
+                <PackageCard
+                  name={pkg.name}
+                  version={pkg.version ?? "—"}
+                  description={pkg.description ?? "No description available."}
+                  weeklyDownloads={pkg.weeklyDownloads ?? 0}
+                  gzipSize={pkg.gzipSize ?? 0}
+                  stars={pkg.stars ?? 0}
+                  isSelected={packages.includes(pkg.name)}
+                  onAddToCompare={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+
+                    packages.includes(pkg.name)
+                      ? removePackage(pkg.name)
+                      : addPackage(pkg.name)
+                  }}
+                  href={`/package/${pkg.name}`}
+                />
+              </motion.div>
             </motion.div>
           ))}
         </motion.div>

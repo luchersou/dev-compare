@@ -79,10 +79,12 @@ export function PopularComparisons({ data }: PopularComparisonsProps) {
 
         <div className="relative">
           <motion.div
+            key={expanded ? "expanded" : "collapsed"}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
             variants={containerVariants}
             initial="hidden"
-            animate="visible"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-50px" }}
           >
             {visible.map((item, index) => (
               <motion.div

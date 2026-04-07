@@ -1,7 +1,7 @@
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Download, Plus, Star, Weight } from "lucide-react"
+import Link from "next/link"
 import { formatDownloads, formatSize, formatStars } from "@/lib/utils"
 import { generateIconColor } from "@/lib/utils"
 
@@ -12,8 +12,8 @@ interface PackageCardProps {
   weeklyDownloads: number
   gzipSize: number
   stars: number
-  href: string
-  onAddToCompare?: () => void
+  href?: string
+  onAddToCompare?: (e: React.MouseEvent<HTMLButtonElement>) => void
   isSelected?: boolean
 }
 
@@ -38,33 +38,33 @@ export function PackageCard({
   weeklyDownloads,
   gzipSize,
   stars,
-  href,
   onAddToCompare,
   isSelected = false,
+  href
+
 }: PackageCardProps) {
   return (
     <Card className={`flex flex-col transition-colors h-full hover:bg-accent/30 ${isSelected ? "border-primary" : ""}`}>
-
+      <Link href={href ?? "#"} className="flex flex-col h-full">
       <CardHeader className="pb-3">
-        <Link
-          href={href}
-          className="flex items-start gap-3 group w-fit"
-        >
+        <div className="flex items-start gap-3 w-full">
           <PackageIcon name={name} />
+
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-semibold text-foreground truncate group-hover:text-primary group-hover:underline transition-colors">
+              <span className="font-mono text-sm font-semibold text-foreground truncate transition-colors group-hover:text-primary group-hover:underline">
                 {name}
               </span>
             </div>
+
             <span className="font-mono text-xs text-muted-foreground">
               v{version}
             </span>
           </div>
-        </Link>
+        </div>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4 flex-1 justify-between">
+      <CardContent className="flex flex-col gap-4 mb-3 flex-1 justify-between w-full">
         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
           {description}
         </p>
@@ -113,6 +113,7 @@ export function PackageCard({
           {isSelected ? "Added" : "Compare"}
         </Button>
       </CardFooter>
+      </Link>
     </Card>
   )
 }
