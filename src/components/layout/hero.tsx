@@ -11,15 +11,12 @@ const fadeUp = {
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-
-      {/* CONTENT */}
       <motion.div
         className="relative z-30 mx-auto max-w-5xl px-6 py-32 text-center"
         initial="hidden"
         animate="visible"
         transition={{ staggerChildren: 0.15 }}
       >
-
         {/* Badge */}
         <motion.div variants={fadeUp} transition={{ duration: 0.5 }}>
           <span className="relative font-mono text-xs tracking-widest text-muted-foreground uppercase border border-border rounded-full px-3 py-1">
@@ -38,7 +35,7 @@ export function Hero() {
             npm packages
           </em>
           <span className="mt-2 block font-sans font-semibold bg-gradient-to-r from-muted-foreground to-muted-foreground/30 bg-clip-text text-transparent">
-            side by side
+            with confidence
           </span>
         </motion.h1>
 
@@ -55,8 +52,8 @@ export function Hero() {
           transition={{ duration: 0.5 }}
           className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg"
         >
-          Analyze downloads, bundle size, and performance to choose the best
-          package for your project.
+          Stop guessing. Compare packages using real data like downloads,
+          bundle size, and performance — all in one place.
         </motion.p>
 
         {/* Search */}
@@ -67,7 +64,6 @@ export function Hero() {
         >
           <SearchBar />
         </motion.div>
-
       </motion.div>
     </section>
   );

@@ -1,7 +1,6 @@
 import { HowItWorks } from "@/components/home/how-it-works"
 import { PopularComparisons } from "@/components/home/popular-comparisons"
 import { PopularPackages } from "@/components/home/popular-packages"
-import { BackgroundEffects } from "@/components/layout/background-effects"
 import { Footer } from "@/components/layout/footer"
 import { Hero } from "@/components/layout/hero"
 import { fetchPopularComparisons } from "@/services/aggregator/popular-comparisons"
@@ -20,7 +19,6 @@ export default async function Home() {
 
   return (
     <main className="relative">
-      <BackgroundEffects glow/>
       <Hero />
       <PopularPackages data={packages} />
       <PopularComparisons data={comparisons} />

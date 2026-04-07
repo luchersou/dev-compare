@@ -46,10 +46,10 @@ export default function RootLayout({
         >
           <Header />
           <QueryProvider>
+            <div className="bg-grid-overlay" />
+            <div className="bg-noise-overlay" />
             <CompareFloatingBar />
-            <div className="pt-16">
               {children}
-            </div>
           </QueryProvider>
         </ThemeProvider>
       </body>

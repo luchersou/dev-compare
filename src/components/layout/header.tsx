@@ -28,16 +28,20 @@ export function Header() {
           : "top-0 w-full bg-transparent"
       )}
     >
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center gap-6 px-6 py-4">
         {/* Logo */}
-        <Link href="/" className="text-lg font-semibold transition hover:opacity-80">
-          DevCompare
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-semibold transition-opacity hover:opacity-80"
+        >
+          <span className="text-primary text-xl leading-none">⇄</span>
+          <span>DevCompare</span>
         </Link>
 
-        {/* Navigation + Theme Toggle */}
-        <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-          
-          <a  href="https://github.com/luchersou/npm-comparator"
+        {/* Nav */}
+        <nav className="flex items-center gap-4 text-sm text-muted-foreground ml-auto">
+          <a
+            href="https://github.com/luchersou/npm-comparator"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 transition hover:text-foreground"
@@ -46,7 +50,6 @@ export function Header() {
             GitHub
           </a>
 
-          {/* Theme Toggle */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="rounded-md p-1.5 transition hover:bg-accent hover:text-accent-foreground"

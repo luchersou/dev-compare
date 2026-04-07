@@ -1,5 +1,4 @@
 import { Suspense } from "react"
-import { BackgroundEffects } from "@/components/layout/background-effects"
 import { PackageContent } from "@/components/package/package-content"
 import { PackageContentSkeleton } from "@/components/package/package-content-skeleton"
 
@@ -9,8 +8,7 @@ interface PackagePageProps {
 
 export default function PackagePage({ params }: PackagePageProps) {
   return (
-    <main>
-      <BackgroundEffects />
+    <main className="pt-12 md:pt-16">
       <Suspense fallback={<PackageContentSkeleton />}>
         <PackageContent params={params} />
       </Suspense>
