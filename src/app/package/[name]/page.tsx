@@ -8,7 +8,7 @@ interface PackagePageProps {
 
 export default function PackagePage({ params }: PackagePageProps) {
   return (
-    <main className="pt-12 md:pt-16">
+    <main>
       <Suspense fallback={<PackageContentSkeleton />}>
         <PackageContent params={params} />
       </Suspense>

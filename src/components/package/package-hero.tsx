@@ -35,7 +35,7 @@ export function PackageHero({ pkg }: PackageHeroProps) {
   }
 
   return (
-    <section className="border-b bg-muted/30 py-8 md:py-12">
+    <section className="border-b bg-muted/30 py-8 md:py-12 pt-14 md:pt-18">
       <Container>
         {/* Breadcrumb */}
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6">
