@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 
 function PackageHeroSkeleton() {
   return (
-    <section className="px-4 py-8 md:px-6 md:py-12">
+    <section className="px-4 py-16 md:px-6 md:py-12">
       <div className="mx-auto max-w-5xl flex flex-col gap-6">
 
         {/* Breadcrumb */}
