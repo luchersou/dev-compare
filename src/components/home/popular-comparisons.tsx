@@ -65,7 +65,7 @@ export function PopularComparisons({ data }: PopularComparisonsProps) {
             transition={{ duration: 0.5 }}
             className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl"
           >
-            Popular comparisons
+            Handpicked comparisons
           </motion.h2>
 
           <motion.p
@@ -73,7 +73,7 @@ export function PopularComparisons({ data }: PopularComparisonsProps) {
             transition={{ duration: 0.5 }}
             className="text-sm text-muted-foreground max-w-md"
           >
-            The most searched package comparisons this week
+            A curated selection of common package comparisons to get you started
           </motion.p>
         </motion.div>
 
