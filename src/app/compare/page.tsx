@@ -18,9 +18,9 @@ export default function ComparePage({ searchParams }: ComparePageProps) {
 
 export async function generateMetadata({ searchParams }: ComparePageProps) {
   const { a, b } = await searchParams
-  if (!a || !b) return { title: "Compare packages — DevCompare" }
+  if (!a || !b) return { title: "Compare packages" }
   return {
-    title: `${a} vs ${b} — DevCompare`,
+    title: `${a} vs ${b}`,
     description: `Compare ${a} and ${b} side by side. Downloads, bundle size, GitHub stats and more.`,
   }
 }

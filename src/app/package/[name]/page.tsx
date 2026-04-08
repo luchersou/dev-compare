@@ -24,10 +24,10 @@ export async function generateMetadata({ params }: PackagePageProps) {
     const { getPackageDetails } = await import("@/services/aggregator/package-details")
     const pkg = await getPackageDetails(decodedName)
     return {
-      title: `${pkg.name} — DevCompare`,
+      title: `${pkg.name}`,
       description: pkg.description,
     }
   } catch {
-    return { title: "Package not found — DevCompare" }
+    return { title: "Package not found" }
   }
 }

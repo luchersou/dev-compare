@@ -3,7 +3,7 @@ import { fetchDownloads } from "@/services/api/downloads"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchGithubRepo } from "@/services/api/github"
 import type { PackageSummary } from "@/types/global"
-import { POPULAR_PACKAGES } from "@/config/popular"
+import { POPULAR_PACKAGES } from "@/config/popular-packages"
 import { extractGithubRepo } from "@/lib/github"
 
 
