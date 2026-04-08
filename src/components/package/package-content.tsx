@@ -1,4 +1,4 @@
-import { getPackageDetails } from "@/services/aggregator/package-details"
+import { getPackageDetails } from "@/services/queries/package-details"
 import { PackageHero } from "@/components/package/package-hero"
 import { StatsGrid } from "@/components/package/stats-grid"
 import { DownloadsChart } from "@/components/package/downloads-chart"

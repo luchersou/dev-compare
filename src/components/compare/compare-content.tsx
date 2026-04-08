@@ -1,4 +1,4 @@
-import { getPackageDetails } from "@/services/aggregator/package-details"
+import { getPackageDetails } from "@/services/queries/package-details"
 import { CompareHeader } from "@/components/compare/compare-header"
 import { CompareStatsTable } from "@/components/compare/compare-stats-table"
 import { CompareVerdict } from "@/components/compare/compare-verdict"

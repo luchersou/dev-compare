@@ -3,8 +3,8 @@ import { PopularComparisons } from "@/components/home/popular-comparisons"
 import { PopularPackages } from "@/components/home/popular-packages"
 import { Footer } from "@/components/layout/footer"
 import { Hero } from "@/components/layout/hero"
-import { fetchPopularComparisons } from "@/services/aggregator/popular-comparisons"
-import { fetchPopularPackages } from "@/services/aggregator/package-summary"
+import { fetchPopularComparisons } from "@/services/queries/popular-comparisons"
+import { fetchPopularPackages } from "@/services/queries/package-summary"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {

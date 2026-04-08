@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PackagePageProps) {
   const decodedName = decodeURIComponent(name)
 
   try {
-    const { getPackageDetails } = await import("@/services/aggregator/package-details")
+    const { getPackageDetails } = await import("@/services/queries/package-details")
     const pkg = await getPackageDetails(decodedName)
     return {
       title: `${pkg.name}`,
