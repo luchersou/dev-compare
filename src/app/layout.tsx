@@ -6,6 +6,8 @@ import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Header } from "@/components/layout/header";
 import { CompareFloatingBar } from "@/components/global/compare-floating-bar";
+import { ScrollToTop } from "@/components/global/scroll-to-top";
+import { ScrollToTopOnNavigate } from "@/components/global/scroll-to-top-on-navigate";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -49,6 +51,8 @@ export default function RootLayout({
             <div className="bg-grid-overlay" />
             <div className="bg-noise-overlay" />
             <CompareFloatingBar />
+            <ScrollToTopOnNavigate />
+            <ScrollToTop />
               {children}
           </QueryProvider>
         </ThemeProvider>
