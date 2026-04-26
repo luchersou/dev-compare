@@ -53,14 +53,10 @@ export function HowItWorks() {
         </motion.div>
 
         {/* Steps grid */}
-        <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-3 rounded-xl overflow-hidden border border-border">
+        <div className="grid grid-cols-1 rounded-xl overflow-hidden border border-border sm:grid-cols-3 sm:divide-x divide-border">
           {STEPS.map((step, i) => (
-            <motion.div
+            <div
               key={step.title}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.45, delay: i * 0.1, ease: "easeOut" }}
               className="group relative overflow-hidden bg-card px-8 py-10 transition-colors duration-200 hover:bg-muted/40"
             >
               {/* Decorative backdrop number */}
@@ -69,7 +65,13 @@ export function HowItWorks() {
               </span>
 
               {/* Content */}
-              <div className="relative z-10">
+              <motion.div
+                className="relative z-10"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.85, delay: i * 0.1, ease: "easeOut" }}
+              >
                 <p className="mb-3 text-[17px] font-medium leading-snug tracking-tight text-foreground">
                   {step.title}
                 </p>
@@ -88,8 +90,8 @@ export function HowItWorks() {
                     </span>
                   ))}
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           ))}
         </div>
       </Container>
