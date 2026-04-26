@@ -194,15 +194,13 @@
     letter-spacing: var(--tracking-normal);
     background-attachment: fixed;
 
-    /* ── Base creme ── */
     background-color: hsl(38 30% 92%);
 
-    /* ── Mesh gradient: blobs coral + teal ── */
     background-image:
-      radial-gradient(ellipse 90% 80% at 15% 40%, hsl(12 65% 62% / 0.55), transparent 70%),
-      radial-gradient(ellipse 80% 75% at 85% 60%, hsl(168 45% 38% / 0.50), transparent 70%),
-      radial-gradient(ellipse 70% 60% at 75% 10%, hsl(155 30% 72% / 0.40), transparent 65%),
-      radial-gradient(ellipse 65% 60% at 30% 85%, hsl(20 50% 70% / 0.35), transparent 65%),
+      radial-gradient(ellipse 60% 50% at 50% -10%, hsl(155 35% 68% / 0.35), transparent 70%),
+      radial-gradient(ellipse 90% 80% at 15% 40%, hsl(12 65% 62% / 0.50), transparent 70%),
+      radial-gradient(ellipse 80% 75% at 85% 60%, hsl(168 45% 38% / 0.45), transparent 70%),
+      radial-gradient(ellipse 65% 60% at 30% 95%, hsl(20 50% 70% / 0.30), transparent 65%),
       linear-gradient(135deg, hsl(38 35% 90%), hsl(160 20% 88%));
   }
 
@@ -210,9 +208,10 @@
     background-color: hsl(220 25% 6%);
 
     background-image:
-      radial-gradient(ellipse 90% 80% at 10% 30%, hsl(12 70% 55% / 0.25), transparent 70%),
-      radial-gradient(ellipse 80% 80% at 90% 70%, hsl(168 60% 45% / 0.22), transparent 70%),
-      radial-gradient(ellipse 70% 60% at 70% 0%, hsl(155 40% 60% / 0.18), transparent 65%),
+      radial-gradient(ellipse 60% 50% at 50% -10%, hsl(155 40% 50% / 0.20), transparent 70%),
+      radial-gradient(ellipse 90% 80% at 10% 30%, hsl(12 70% 55% / 0.32), transparent 70%),
+      radial-gradient(ellipse 80% 80% at 90% 70%, hsl(168 60% 45% / 0.28), transparent 70%),
+      radial-gradient(ellipse 70% 60% at 70% 0%, hsl(155 40% 60% / 0.15), transparent 65%),
       linear-gradient(to bottom, hsl(220 25% 6%), hsl(220 25% 8%));
   }
 }
@@ -225,7 +224,7 @@
     pointer-events: none;
     z-index: -1;
 
-    --grid-color: rgba(0, 0, 0, 0.06);
+    --grid-color: rgba(0, 0, 0, 0.05);
 
     background-image:
       linear-gradient(var(--grid-color) 1px, transparent 1px),
@@ -233,14 +232,14 @@
     background-size: 50px 50px;
 
     mask-image: radial-gradient(
-      ellipse 80% 80% at 50% 50%,
-      transparent 30%,
-      black 100%
+      ellipse 60% 60% at 50% 50%,
+      black 0%,
+      transparent 100%
     );
     -webkit-mask-image: radial-gradient(
-      ellipse 80% 80% at 50% 50%,
-      transparent 30%,
-      black 100%
+      ellipse 60% 60% at 50% 50%,
+      black 0%,
+      transparent 100%
     );
   }
 
@@ -248,18 +247,22 @@
     --grid-color: rgba(255, 255, 255, 0.03);
   }
 
-  /* ── Grain overlay – */
+  /* ── Grain overlay ── */
   .bg-noise-overlay {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: -1;
-    opacity: 0.055; 
+    opacity: 0.04;
 
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 
     background-repeat: repeat;
-    background-size: 128px 128px;
+    background-size: 220px 220px;
+  }
+
+  .dark .bg-noise-overlay {
+    opacity: 0.08;
   }
 
   @media (prefers-reduced-motion: reduce) {
