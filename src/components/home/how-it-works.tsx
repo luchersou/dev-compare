@@ -53,7 +53,7 @@ export function HowItWorks() {
         </motion.div>
 
         {/* Steps grid */}
-        <div className="grid grid-cols-1 divide-y divide-border hover:bg-accent/30 border border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-3 rounded-xl overflow-hidden border border-border">
           {STEPS.map((step, i) => (
             <motion.div
               key={step.title}
@@ -61,40 +61,34 @@ export function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.45, delay: i * 0.1, ease: "easeOut" }}
-              className="group relative bg-card p-8 transition-colors duration-200 hover:bg-muted/40"
+              className="group relative overflow-hidden bg-card px-8 py-10 transition-colors duration-200 hover:bg-muted/40"
             >
-              {/* Number row */}
-              <div className="mb-7 flex items-center justify-between">
-                <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/60">
-                  Step
-                </span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-muted text-xs font-medium text-muted-foreground transition-colors group-hover:border-foreground/20 group-hover:text-foreground">
-                  {i + 1}
-                </span>
-              </div>
+              {/* Decorative backdrop number */}
+              <span className="pointer-events-none absolute -bottom-3 -right-2 select-none text-[7rem] font-semibold leading-none tracking-tighter text-foreground/[0.04] transition-all duration-300 group-hover:text-foreground/[0.07] group-hover:-bottom-1">
+                {i + 1}
+              </span>
 
               {/* Content */}
-              <p className="mb-2.5 text-[17px] font-medium leading-snug tracking-tight text-foreground">
-                {step.title}
-              </p>
-              <p className="mb-6 text-[13px] leading-relaxed text-muted-foreground">
-                {step.description}
-              </p>
+              <div className="relative z-10">
+                <p className="mb-3 text-[17px] font-medium leading-snug tracking-tight text-foreground">
+                  {step.title}
+                </p>
+                <p className="mb-6 text-[13px] leading-relaxed text-muted-foreground">
+                  {step.description}
+                </p>
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1.5">
-                {step.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-muted-foreground"
-                  >
-                    {tag}
-                  </span>
-                ))}
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5">
+                  {step.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-muted-foreground"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-
-              {/* Hover accent line */}
-              <div className="absolute bottom-0 left-8 right-0 h-px origin-left scale-x-0 bg-border transition-transform duration-300 ease-out group-hover:scale-x-100" />
             </motion.div>
           ))}
         </div>
