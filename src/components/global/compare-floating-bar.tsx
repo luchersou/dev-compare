@@ -50,7 +50,7 @@ export function CompareFloatingBar() {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed bottom-4 left-1/2 z-60 -translate-x-1/2 sm:bottom-6"
+        className="fixed bottom-4 left-1/2 z-[9999] -translate-x-1/2 sm:bottom-6"
       >
         <div className="flex items-center gap-2 rounded-xl border border-border bg-background/90 px-3 py-2.5 shadow-lg backdrop-blur-md sm:gap-3 sm:px-4 sm:py-3">
 
