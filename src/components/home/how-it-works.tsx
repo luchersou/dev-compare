@@ -35,7 +35,7 @@ export function HowItWorks() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.85, ease: "easeOut" }}
           className="mb-16"
         >
           <div className="mb-4 flex items-center gap-2">
@@ -60,7 +60,7 @@ export function HowItWorks() {
               className="group relative overflow-hidden bg-card px-8 py-10 transition-colors duration-200 hover:bg-muted/40"
             >
               {/* Decorative backdrop number */}
-              <span className="pointer-events-none absolute -bottom-3 -right-2 select-none text-[7rem] font-semibold leading-none tracking-tighter text-foreground/[0.04] transition-all duration-300 group-hover:text-foreground/[0.07] group-hover:-bottom-1">
+              <span className="pointer-events-none absolute -bottom-3 -right-2 select-none text-[7rem] font-semibold leading-none tracking-tighter text-foreground/[0.10] transition-all duration-300 group-hover:text-foreground/[0.18] group-hover:-bottom-1">
                 {i + 1}
               </span>
 
