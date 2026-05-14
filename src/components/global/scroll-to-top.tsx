@@ -35,7 +35,7 @@ export function ScrollToTop() {
             className="rounded-full shadow-md h-12 w-12 cursor-pointer"
             aria-label="Scroll to top"
           >
-            <ArrowUp className="h-6 w-6" />
+            <ArrowUp className="h-8 w-8" />
           </Button>
         </motion.div>
       )}
