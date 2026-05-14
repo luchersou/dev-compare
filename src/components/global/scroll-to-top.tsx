@@ -32,10 +32,10 @@ export function ScrollToTop() {
             size="icon"
             variant="outline"
             onClick={scrollToTop}
-            className="rounded-full shadow-md"
+            className="rounded-full shadow-md h-12 w-12 cursor-pointer"
             aria-label="Scroll to top"
           >
-            <ArrowUp className="h-5 w-5" />
+            <ArrowUp className="h-6 w-6" />
           </Button>
         </motion.div>
       )}
