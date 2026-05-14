@@ -55,9 +55,13 @@ export function HowItWorks() {
         {/* Steps grid */}
         <div className="grid grid-cols-1 rounded-xl overflow-hidden border border-border sm:grid-cols-3 sm:divide-x divide-border">
           {STEPS.map((step, i) => (
-            <div
+            <motion.div
               key={step.title}
               className="group relative overflow-hidden bg-card px-8 py-10 transition-colors duration-200 hover:bg-muted/40"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.85, delay: i * 0.1, ease: "easeOut" }}
             >
               {/* Decorative backdrop number */}
               <span className="pointer-events-none absolute -bottom-3 -right-2 select-none text-[7rem] font-semibold leading-none tracking-tighter text-foreground/[0.10] transition-all duration-300 group-hover:text-foreground/[0.18] group-hover:-bottom-1">
@@ -65,13 +69,7 @@ export function HowItWorks() {
               </span>
 
               {/* Content */}
-              <motion.div
-                className="relative z-10"
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.85, delay: i * 0.1, ease: "easeOut" }}
-              >
+              <div className="relative z-10">
                 <p className="mb-3 text-[17px] font-medium leading-snug tracking-tight text-foreground">
                   {step.title}
                 </p>
@@ -79,7 +77,6 @@ export function HowItWorks() {
                   {step.description}
                 </p>
 
-                {/* Tags */}
                 <div className="flex flex-wrap gap-1.5">
                   {step.tags.map((tag) => (
                     <span
@@ -90,8 +87,8 @@ export function HowItWorks() {
                     </span>
                   ))}
                 </div>
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           ))}
         </div>
       </Container>
