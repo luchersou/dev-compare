@@ -84,7 +84,7 @@ export function PopularComparisons({ data }: PopularComparisonsProps) {
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: false, margin: "-50px" }}
+            viewport={{ once: true, margin: "-50px" }}
           >
             {visible.map((item, index) => (
               <motion.div
@@ -108,7 +108,7 @@ export function PopularComparisons({ data }: PopularComparisonsProps) {
               variant="outline"
               size="sm"
               onClick={() => setExpanded((prev) => !prev)}
-              className="text-muted-foreground"
+              className="text-muted-foreground cursor-pointer"
             >
               {expanded ? "See less comparisons" : "See more comparisons"}
             </Button>
