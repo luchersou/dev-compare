@@ -3,6 +3,7 @@
 import { GitCompareArrows, Plus,X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { compareHref } from "@/lib/routes"
@@ -35,6 +36,12 @@ function EmptySlot() {
 export function CompareFloatingBar() {
   const { packages, removePackage, clear } = useCompareStore()
   const router = useRouter()
+
+  // Rendered once in the root layout, so this restores the saved selection
+  // for every page.
+  useEffect(() => {
+    useCompareStore.persist.rehydrate()
+  }, [])
 
   const canCompare = packages.length === 2
 

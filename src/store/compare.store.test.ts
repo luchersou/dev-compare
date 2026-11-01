@@ -48,3 +48,27 @@ describe("clear", () => {
     expect(useCompareStore.getState().packages).toEqual([])
   })
 })
+describe("persistence", () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useCompareStore.setState({ packages: [] })
+  })
+
+  it("saves the selection to localStorage", () => {
+    useCompareStore.getState().addPackage("react")
+
+    const saved = JSON.parse(localStorage.getItem("devcompare-selection") ?? "{}")
+    expect(saved.state).toEqual({ packages: ["react"] })
+  })
+
+  it("restores the selection on rehydrate", async () => {
+    localStorage.setItem(
+      "devcompare-selection",
+      JSON.stringify({ state: { packages: ["vue", "svelte"] }, version: 0 })
+    )
+
+    await useCompareStore.persist.rehydrate()
+
+    expect(useCompareStore.getState().packages).toEqual(["vue", "svelte"])
+  })
+})
