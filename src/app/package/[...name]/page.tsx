@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import { PackageContent } from "@/components/package/package-content"
 import { PackageContentSkeleton } from "@/components/package/package-content-skeleton"
 import { packageNameFromSegments } from "@/lib/routes"
+import { getPackageDetails } from "@/services/queries/package-details"
 
 interface PackagePageProps {
   params: Promise<{ name: string[] }>
@@ -23,7 +24,6 @@ export async function generateMetadata({ params }: PackagePageProps) {
   const decodedName = packageNameFromSegments(name)
 
   try {
-    const { getPackageDetails } = await import("@/services/queries/package-details")
     const pkg = await getPackageDetails(decodedName)
     return {
       title: `${pkg.name}`,

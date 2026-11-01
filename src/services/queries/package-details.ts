@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import { cache } from "react"
 
 import { extractGithubRepo, normalizeRepositoryUrl, rawRepositoryUrl } from "@/lib/github"
 import { OPTIONAL_SOURCE_TIMEOUT, withTimeout } from "@/lib/timeout"
@@ -8,7 +9,9 @@ import { fetchGithubRepo } from "@/services/api/github"
 import { fetchNpmPackage, fetchPublishedAt, PackageNotFoundError } from "@/services/api/npm"
 import { PackageDetails } from "@/types/global"
 
-export async function getPackageDetails(name: string): Promise<PackageDetails> {
+// Wrapped in cache() so generateMetadata and the page share one call per
+// request instead of resolving the package twice.
+export const getPackageDetails = cache(async (name: string): Promise<PackageDetails> => {
   // Everything except GitHub only needs the package name, so start it all
   // at once; GitHub waits for the repository url from the manifest.
   const extrasPromise = Promise.all([
@@ -61,7 +64,7 @@ export async function getPackageDetails(name: string): Promise<PackageDetails> {
         }
       : undefined,
   }
-}
+})
 
 // Unknown packages render the not-found page; any other failure bubbles up
 // to the nearest error boundary.
