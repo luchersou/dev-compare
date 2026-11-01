@@ -1,6 +1,6 @@
 # DevCompare
 
-![CI](https://github.com/luchersou/npm-comparator/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/luchersou/dev-compare/actions/workflows/ci.yml/badge.svg)
 
 DevCompare is a developer tool for comparing npm packages side by side.
 Search any package to explore its weekly downloads, bundle size, GitHub activity and metadata — or pick two packages and get a full head-to-head breakdown with a verdict to help you decide.

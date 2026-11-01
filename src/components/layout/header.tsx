@@ -50,7 +50,7 @@ export function Header() {
         {/* Nav */}
         <nav className="flex items-center gap-4 text-sm text-muted-foreground ml-auto">
           <a
-            href="https://github.com/luchersou/npm-comparator"
+            href="https://github.com/luchersou/dev-compare"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 transition hover:text-foreground"
