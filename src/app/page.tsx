@@ -1,3 +1,5 @@
+import "./styles/home.css"
+
 import { Metadata } from "next"
 
 import { CloseSection } from "@/components/home/close-section"

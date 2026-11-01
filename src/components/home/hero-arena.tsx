@@ -5,10 +5,15 @@ import { useEffect, useRef, useState } from "react"
 
 import { formatDownloads } from "@/lib/utils"
 
-import type { FieldLane } from "./hero-field"
+export interface ArenaPair {
+  a: string
+  b: string
+  aDownloads: number | null
+  bDownloads: number | null
+}
 
 interface HeroArenaProps {
-  pairs: FieldLane[]
+  pairs: ArenaPair[]
   onPairChange?: (index: number) => void
 }
 
@@ -55,7 +60,7 @@ function weight(downloads: number | null, max: number) {
   return Math.min(1, Math.max(0, (Math.log10(downloads) - 4) / (Math.log10(max) - 4)))
 }
 
-export function winnerOf(pair: FieldLane): "a" | "b" | "tie" {
+export function winnerOf(pair: ArenaPair): "a" | "b" | "tie" {
   const a = pair.aDownloads ?? 0
   const b = pair.bDownloads ?? 0
   return a > b ? "a" : b > a ? "b" : "tie"

@@ -1,3 +1,5 @@
+import "../styles/compare.css"
+
 import { Suspense } from "react"
 
 import { CompareContent } from "@/components/compare/compare-content"

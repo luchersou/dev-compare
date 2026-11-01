@@ -7,8 +7,7 @@ import { SearchBar } from "@/components/search/search-bar";
 import { compareHref } from "@/lib/routes";
 import type { ComparisonCardData } from "@/types/compare";
 
-import { HeroArena } from "./hero-arena";
-import type { FieldLane } from "./hero-field";
+import { type ArenaPair, HeroArena } from "./hero-arena";
 
 interface HeroProps {
   comparisons: ComparisonCardData[];
@@ -16,7 +15,7 @@ interface HeroProps {
 
 export function Hero({ comparisons }: HeroProps) {
   const [pairIndex, setPairIndex] = useState(0);
-  const pairs = useMemo<FieldLane[]>(
+  const pairs = useMemo<ArenaPair[]>(
     () =>
       comparisons.map(({ pair, a, b }) => ({
         a: pair.a,
@@ -29,7 +28,7 @@ export function Hero({ comparisons }: HeroProps) {
   const sample = comparisons[pairIndex]?.pair ?? comparisons[0]?.pair;
 
   return (
-    <section className="hero hero--stage" aria-labelledby="hero-head">
+    <section className="hero" aria-labelledby="hero-head">
       <div className="container hero__grid">
         <div className="hero__copy">
           <h1 id="hero-head">Compare npm packages with confidence</h1>

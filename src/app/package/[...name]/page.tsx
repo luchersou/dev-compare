@@ -1,3 +1,5 @@
+import "../../styles/package.css"
+
 import { Suspense } from "react"
 
 import { PackageContent } from "@/components/package/package-content"

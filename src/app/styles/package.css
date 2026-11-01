@@ -1,7 +1,5 @@
 /* Hallmark · package styles of the Cobalt redesign; the full stamp, critique and waivers are in globals.css */
 
-.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); color: var(--color-muted); font: 400 var(--text-sm)/1.4 var(--font-body); }
-.crumbs .mono { color: var(--color-ink); }
 
 .pkg-hero { padding-bottom: var(--space-2xl); border-bottom: var(--rule-hair) solid var(--color-rule); }
 .pkg-hero__inner { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap-columns); row-gap: var(--space-xl); align-items: end; }

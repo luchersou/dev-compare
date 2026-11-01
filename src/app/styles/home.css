@@ -1,30 +1,13 @@
 /* Hallmark · home styles of the Cobalt redesign; the full stamp, critique and waivers are in globals.css */
 
-/* ── Hero: a Corridor over the field ─────────────────────────────── */
+/* ── Hero: the copy beside the arena ─────────────────────────────── */
 
-.hero { position: relative; display: grid; align-items: center; min-height: 100svh; padding-block: calc(var(--banner-height) + var(--space-xl)) var(--space-3xl); overflow: clip; isolation: isolate; }
-/* Without script, a dot grid on the cell stands in for the field. */
-.hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: radial-gradient(circle at 1px 1px, var(--color-glyph-2) 1px, transparent 1.5px); background-size: var(--cell-w) var(--cell-h); mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, transparent 30%, black 75%); }
-.hero:has(.field[data-ready])::before { display: none; }
-.field { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; }
-.hero__inner { display: flex; justify-content: center; }
-.hero__text { display: grid; justify-items: center; gap: var(--space-lg); max-width: 44rem; text-align: center; }
-.hero__text h1 { max-width: 14ch; text-wrap: balance; font-size: clamp(3rem, 6vw + 1rem, 6rem); line-height: 0.98; }
-.hero__text .lead { color: var(--color-ink-2); max-width: 36ch; }
-.hero__actions { display: grid; justify-items: center; gap: var(--space-md); width: 100%; margin-top: var(--space-xs); }
-.hero__actions .search-key { max-width: 520px; }
-.hero__caption { position: absolute; left: 50%; bottom: var(--space-lg); translate: -50% 0; width: max-content; max-width: calc(100% - 2 * var(--gutter)); color: var(--color-muted); font: 400 var(--text-sm)/1.4 var(--font-body); text-align: center; }
-.field__toggle { position: absolute; right: var(--gutter); bottom: var(--space-md); display: inline-flex; align-items: center; gap: var(--space-xs); min-height: 44px; padding: 0 var(--space-sm); border: var(--rule-hair) solid var(--color-rule-2); border-radius: var(--radius-input); background: var(--color-paper); color: var(--color-ink-2); font: 500 var(--text-sm)/1 var(--font-display); cursor: pointer; transition: background-color var(--dur-short) var(--ease-out); }
-.field__toggle:hover { background: var(--color-paper-2); }
-.field__toggle:active { background: var(--color-paper-3); }
-.field__toggle:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-.field__toggle svg { width: 14px; height: 14px; }
-html:not(:has(.field[data-ready])) .field__toggle { display: none; }
-@media (prefers-reduced-motion: reduce) { .field__toggle { display: none; } }
-@media (max-width: 60rem) {
-  .hero__caption { position: static; translate: none; width: auto; margin: var(--space-xl) var(--gutter) 0; }
-  .field__toggle { display: none; }
-}
+.hero { display: grid; align-items: center; min-height: 100svh; padding-block: calc(var(--banner-height) + var(--space-xl)) var(--space-2xl); }
+.hero__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--space-3xl); align-items: center; }
+.hero__copy { display: grid; gap: var(--space-lg); }
+.hero__copy h1 { max-width: 11ch; font-size: clamp(2.75rem, 4.2vw + 0.5rem, 5rem); line-height: 1; text-wrap: balance; }
+.hero__copy .lead { color: var(--color-ink-2); max-width: 32ch; }
+.hero__cta { display: grid; justify-items: start; gap: var(--space-md); margin-top: var(--space-xs); }
 
 /* ── Feature Stack: a pinned pane beside real screens ────────────── */
 
@@ -140,16 +123,6 @@ html:not(.js) .duel__panel[hidden] { display: grid !important; margin-top: var(-
 .close .screen__frame { aspect-ratio: auto; }
 .close .screen__frame img { position: static; height: auto; }
 @media (max-width: 60rem) { .close { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xl); } }
-
-/* ── Hero, stage variant: the copy beside the arena ──────────────── */
-
-.hero--stage { padding-block: calc(var(--banner-height) + var(--space-xl)) var(--space-2xl); }
-.hero--stage::before { display: none; }
-.hero__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--space-3xl); align-items: center; }
-.hero__copy { display: grid; gap: var(--space-lg); }
-.hero__copy h1 { max-width: 11ch; font-size: clamp(2.75rem, 4.2vw + 0.5rem, 5rem); line-height: 1; text-wrap: balance; }
-.hero__copy .lead { color: var(--color-ink-2); max-width: 32ch; }
-.hero__cta { display: grid; justify-items: start; gap: var(--space-md); margin-top: var(--space-xs); }
 
 /* The arena: two packages flow in from the sides and condense into the
    name of the one that leads. */
