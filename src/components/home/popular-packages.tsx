@@ -1,30 +1,16 @@
 "use client"
 
-import { Package } from "lucide-react"
-import { motion } from "motion/react"
+import { Check, Plus } from "lucide-react"
+import Link from "next/link"
 
-import { PackageCard } from "@/components/home/popular-package-card"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
 import { packageHref } from "@/lib/routes"
+import { formatDownloads, formatSize, formatStars } from "@/lib/utils"
 import { useCompareStore } from "@/store/compare.store"
 import type { PackageSummary } from "@/types/global"
 
 const MOBILE_VISIBLE_LIMIT = 6
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-}
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0 },
-}
 
 interface PopularPackagesProps {
   data: PackageSummary[]
@@ -32,86 +18,71 @@ interface PopularPackagesProps {
 
 export function PopularPackages({ data }: PopularPackagesProps) {
   const { packages, addPackage, removePackage } = useCompareStore()
-  
+
   return (
-    <Section>
+    <Section labelledBy="packages-title">
       <Container>
-        <motion.div
-          className="mb-10 flex flex-col gap-2"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ staggerChildren: 0.1 }}
-        >
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.4 }}
-            className="flex items-center gap-2"
-          >
-            <Package className="h-4 w-4 text-primary" />
-            <span className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-              popular
-            </span>
-          </motion.div>
-
-          <motion.h2
-            variants={fadeUp}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl"
-          >
-            Essential packages
-          </motion.h2>
-
-          <motion.p
-            variants={fadeUp}
-            transition={{ duration: 0.5 }}
-            className="text-sm text-muted-foreground max-w-md"
-          >
+        <div className="head-block">
+          <h2 id="packages-title">Essential packages</h2>
+          <p className="lead">
             The most used packages in the JavaScript ecosystem, hand-picked for you to explore and compare.
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
-        <motion.div
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-        >
-          {data.map((pkg, index) => (
-            <motion.div
-              key={pkg.name}
-              variants={fadeUp}
-              transition={{ duration: 0.4 }}
-              className={`h-full ${index >= MOBILE_VISIBLE_LIMIT ? "hidden sm:block" : ""}`}
-            >
-              <motion.div
-                key={pkg.name}
-                variants={fadeUp}
-                transition={{ duration: 0.4 }}
-                className={`h-full ${index >= MOBILE_VISIBLE_LIMIT ? "hidden sm:block" : ""}`}
-              >
-                <PackageCard
-                  name={pkg.name}
-                  version={pkg.version ?? "—"}
-                  description={pkg.description ?? "No description available."}
-                  weeklyDownloads={pkg.weeklyDownloads ?? 0}
-                  gzipSize={pkg.gzipSize ?? 0}
-                  stars={pkg.stars ?? 0}
-                  isSelected={packages.includes(pkg.name)}
-                  onAddToCompare={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
+        <table className="index">
+          <thead>
+            <tr>
+              <th scope="col">Package</th>
+              <th scope="col" className="hide-md">Version</th>
+              <th scope="col" className="num-col">Weekly</th>
+              <th scope="col" className="num-col hide-sm">Gzip</th>
+              <th scope="col" className="num-col hide-md">Stars</th>
+              <th scope="col"><span className="visually-hidden">Compare</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((pkg, index) => {
+              const isSelected = packages.includes(pkg.name)
+              const isFull = !isSelected && packages.length >= 2
+              return (
+                <tr
+                  key={pkg.name}
+                  data-selected={isSelected}
+                  data-mobile-hidden={index >= MOBILE_VISIBLE_LIMIT}
+                >
+                  <td>
+                    <div className="index__pkg">
+                      <Link href={packageHref(pkg.name)} className="link">{pkg.name}</Link>
+                      <span>{pkg.description ?? "No description available."}</span>
+                    </div>
+                  </td>
+                  <td className="index__version hide-md">{pkg.version ?? "—"}</td>
+                  <td className="index__fig">{formatDownloads(pkg.weeklyDownloads ?? 0)}</td>
+                  <td className="index__fig hide-sm">{formatSize(pkg.gzipSize ?? 0)}</td>
+                  <td className="index__fig hide-md">{formatStars(pkg.stars ?? 0)}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="key key--sm key--icon"
+                      aria-pressed={isSelected}
+                      disabled={isFull}
+                      aria-label={isSelected ? `Remove ${pkg.name} from compare` : `Add ${pkg.name} to compare`}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
 
-                    if (packages.includes(pkg.name)) removePackage(pkg.name)
-                    else addPackage(pkg.name)
-                  }}
-                  href={packageHref(pkg.name)}
-                />
-              </motion.div>
-            </motion.div>
-          ))}
-        </motion.div>
+                        if (packages.includes(pkg.name)) removePackage(pkg.name)
+                        else addPackage(pkg.name)
+                      }}
+                    >
+                      {isSelected ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </Container>
     </Section>
   )

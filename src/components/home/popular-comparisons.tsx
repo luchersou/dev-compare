@@ -1,121 +1,143 @@
 "use client"
 
-import { GitCompare } from "lucide-react"
-import { motion } from "motion/react"
-import { useState } from "react"
+import Link from "next/link"
+import { useRef, useState } from "react"
 
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
-import { Button } from "@/components/ui/button"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { compareHref } from "@/lib/routes"
+import { formatDownloads, formatSize } from "@/lib/utils"
 import type { ComparisonCardData } from "@/types/compare"
 
-import { ComparisonCard } from "./comparison-card"
-
 const INITIAL_VISIBLE_DESKTOP = 6
-const INITIAL_VISIBLE_MOBILE = 3
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-}
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0 },
-}
+const INITIAL_VISIBLE_MOBILE = 4
 
 interface PopularComparisonsProps {
   data: ComparisonCardData[]
 }
 
+function Metric({
+  title,
+  item,
+  pick,
+  format,
+}: {
+  title: string
+  item: ComparisonCardData
+  pick: (side: ComparisonCardData["a"]) => number | null
+  format: (n: number | null) => string
+}) {
+  const a = pick(item.a)
+  const b = pick(item.b)
+  const max = Math.max(a ?? 0, b ?? 0)
+  if (!max) return null
+
+  return (
+    <div className="duel__metric">
+      <h4>{title}</h4>
+      {([["a", item.pair.a, a], ["b", item.pair.b, b]] as const).map(([side, name, value]) => (
+        <div key={side} className={`duel__row duel__row--${side}`}>
+          <span className="duel__name">{name}</span>
+          <span className="duel__track" aria-hidden="true">
+            <span className="duel__bar" style={{ width: `${Math.max(1, ((value ?? 0) / max) * 100)}%` }} />
+          </span>
+          <span className="duel__value">{format(value)}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function PopularComparisons({ data }: PopularComparisonsProps) {
   const [expanded, setExpanded] = useState(false)
+  const [active, setActive] = useState(0)
+  const tabsRef = useRef<Array<HTMLButtonElement | null>>([])
   const isMobile = useMediaQuery("(max-width: 640px)")
 
   const visibleCount = isMobile ? INITIAL_VISIBLE_MOBILE : INITIAL_VISIBLE_DESKTOP
   const visible = expanded ? data : data.slice(0, visibleCount)
   const hasMore = data.length > visibleCount
+  const current = Math.min(active, visible.length - 1)
+
+  // Arrow keys move between pairs, as a tablist should.
+  function onKeyDown(e: React.KeyboardEvent, index: number) {
+    const delta = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 0
+    if (!delta) return
+    e.preventDefault()
+    const next = (index + delta + visible.length) % visible.length
+    setActive(next)
+    tabsRef.current[next]?.focus()
+  }
+
+  if (data.length === 0) return null
 
   return (
-    <Section>
+    <Section labelledBy="duel-title">
       <Container>
-        <motion.div
-          className="mb-10 flex flex-col gap-2"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ staggerChildren: 0.1 }}
-        >
-          <motion.div
-            variants={fadeUp}
-            transition={{ duration: 0.4 }}
-            className="flex items-center gap-2"
-          >
-            <GitCompare className="h-4 w-4 text-primary" />
-            <span className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-              comparisons
-            </span>
-          </motion.div>
-
-          <motion.h2
-            variants={fadeUp}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl"
-          >
-            Handpicked comparisons
-          </motion.h2>
-
-          <motion.p
-            variants={fadeUp}
-            transition={{ duration: 0.5 }}
-            className="text-sm text-muted-foreground max-w-md"
-          >
-            A curated selection of common package comparisons to get you started
-          </motion.p>
-        </motion.div>
-
-        <div className="relative">
-          <motion.div
-            key={expanded ? "expanded" : "collapsed"}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-          >
-            {visible.map((item, index) => (
-              <motion.div
-                key={`${item.pair.a}-${item.pair.b}`}
-                variants={fadeUp}
-                transition={{ duration: 0.4, delay: index >= (isMobile ? INITIAL_VISIBLE_MOBILE : INITIAL_VISIBLE_DESKTOP) ? (index % 3) * 0.08 : 0 }}
-              >
-                <ComparisonCard data={item} />
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {hasMore && !expanded && (
-            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-          )}
+        <div className="duel__head">
+          <h2 id="duel-title">Handpicked comparisons</h2>
+          <p className="lead">A curated selection of common package comparisons to get you started.</p>
         </div>
 
-        {hasMore && (
-          <div className="flex justify-center mt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setExpanded((prev) => !prev)}
-              className="text-muted-foreground cursor-pointer"
-            >
-              {expanded ? "See less comparisons" : "See more comparisons"}
-            </Button>
+        <div className="duel">
+          <div>
+            <div className="duel__tray" role="tablist" aria-label="Comparisons" aria-orientation="vertical">
+              {visible.map((item, i) => (
+                <button
+                  key={`${item.pair.a}-${item.pair.b}`}
+                  ref={(el) => { tabsRef.current[i] = el }}
+                  type="button"
+                  role="tab"
+                  id={`duel-tab-${i}`}
+                  aria-selected={i === current}
+                  aria-pressed={i === current}
+                  aria-controls={`duel-panel-${i}`}
+                  tabIndex={i === current ? 0 : -1}
+                  className="key key--sm"
+                  onClick={() => setActive(i)}
+                  onKeyDown={(e) => onKeyDown(e, i)}
+                >
+                  <span>{item.pair.a}</span>
+                  <span>vs</span>
+                  <span>{item.pair.b}</span>
+                </button>
+              ))}
+            </div>
+
+            {hasMore && (
+              <button
+                type="button"
+                className="key key--sm duel__more"
+                onClick={() => setExpanded((prev) => !prev)}
+              >
+                {expanded ? "See less comparisons" : "See more comparisons"}
+              </button>
+            )}
           </div>
-        )}
+
+          {visible.map((item, i) => (
+            <div
+              key={`${item.pair.a}-${item.pair.b}`}
+              role="tabpanel"
+              id={`duel-panel-${i}`}
+              aria-labelledby={`duel-tab-${i}`}
+              hidden={i !== current}
+              className="duel__panel cut"
+            >
+              <h3 className="duel__title">
+                <span className="mono">{item.pair.a}</span>
+                <span className="vs">vs</span>
+                <span className="mono">{item.pair.b}</span>
+              </h3>
+              <Metric title="Downloads / week" item={item} pick={(s) => s.downloads} format={formatDownloads} />
+              <Metric title="Bundle size (gzip)" item={item} pick={(s) => s.bundleSize} format={formatSize} />
+              <Link href={compareHref(item.pair.a, item.pair.b)} className="key key--primary">
+                Open the full comparison
+              </Link>
+            </div>
+          ))}
+        </div>
       </Container>
     </Section>
   )

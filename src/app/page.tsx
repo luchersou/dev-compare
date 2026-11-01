@@ -1,5 +1,7 @@
 import { Metadata } from "next"
 
+import { CloseSection } from "@/components/home/close-section"
+import { DataSources } from "@/components/home/data-sources"
 import { Hero } from "@/components/home/hero"
 import { HowItWorks } from "@/components/home/how-it-works"
 import { PopularComparisons } from "@/components/home/popular-comparisons"
@@ -19,12 +21,16 @@ export default async function Home() {
   ]);
 
   return (
-    <main className="relative">
-      <Hero />
-      <PopularPackages data={packages} />
-      <PopularComparisons data={comparisons} />
-      <HowItWorks />
+    <>
+      <main id="main">
+        <Hero comparisons={comparisons} />
+        <HowItWorks />
+        <PopularComparisons data={comparisons} />
+        <PopularPackages data={packages} />
+        <DataSources />
+        <CloseSection />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }

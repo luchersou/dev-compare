@@ -60,6 +60,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(familjen.variable, plex.variable, jetbrains.variable)}
     >
+      <head>
+        {/* Marks that script runs, so no-script states (every switcher panel) can show. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body>
         <ThemeProvider
           attribute="class"

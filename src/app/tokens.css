@@ -53,6 +53,7 @@
   --shadow-key-accent: 0 3px 0 0 var(--color-accent-edge), 0 6px 8px -4px oklch(30% 0.12 260 / 0.45), inset 0 1px 0 oklch(100% 0 0 / 0.22);
   --shadow-key-press: inset 0 1px 2px oklch(21% 0.028 262 / 0.14);
   --shadow-panel: 0 1px 0 var(--color-rule), 0 18px 32px -24px oklch(21% 0.028 262 / 0.28);
+  --shadow-tray: inset 0 1px 3px oklch(21% 0.028 262 / 0.1);
   --tracking-display: -0.028em;
 }
 :root {
@@ -117,6 +118,7 @@
   --shadow-key-accent: 0 3px 0 0 var(--color-accent-edge), inset 0 1px 0 oklch(100% 0 0 / 0.18);
   --shadow-key-press: inset 0 1px 2px oklch(5% 0.01 262 / 0.5);
   --shadow-panel: 0 0 0 1px var(--color-rule);
+  --shadow-tray: inset 0 0 0 1px var(--color-rule);
 }
 .dark body { font-weight: 350; }
 @media (max-width: 60rem) { :root { --gutter: 24px; --section-gap-s: 80px; --section-gap: 96px; --section-gap-l: 120px; } }

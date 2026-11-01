@@ -1,71 +1,56 @@
 "use client";
 
-import { motion } from "motion/react";
+import Link from "next/link";
+import { useMemo, useRef } from "react";
 
 import { SearchBar } from "@/components/search/search-bar";
+import { compareHref } from "@/lib/routes";
+import type { ComparisonCardData } from "@/types/compare";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 },
-};
+import { type FieldLane, HeroField } from "./hero-field";
 
-export function Hero() {
+interface HeroProps {
+  comparisons: ComparisonCardData[];
+}
+
+export function Hero({ comparisons }: HeroProps) {
+  const textRef = useRef<HTMLDivElement>(null);
+  const lanes = useMemo<FieldLane[]>(
+    () =>
+      comparisons.map(({ pair, a, b }) => ({
+        a: pair.a,
+        b: pair.b,
+        aDownloads: a.downloads,
+        bDownloads: b.downloads,
+      })),
+    [comparisons]
+  );
+  const sample = comparisons[0]?.pair;
+
   return (
-    <section className="relative overflow-hidden">
-      <motion.div
-        className="relative z-30 mx-auto max-w-5xl px-6 py-32 text-center"
-        initial="hidden"
-        animate="visible"
-        transition={{ staggerChildren: 0.15 }}
-      >
-        {/* Badge */}
-        <motion.div variants={fadeUp} transition={{ duration: 0.5 }}>
-          <span className="relative font-mono text-xs tracking-widest text-muted-foreground uppercase border border-border rounded-full px-3 py-1">
-            npm intelligence
-          </span>
-        </motion.div>
+    <section className="hero" aria-labelledby="hero-head">
+      <HeroField lanes={lanes} calmRef={textRef} />
 
-        {/* Title */}
-        <motion.h1
-          variants={fadeUp}
-          transition={{ duration: 0.6 }}
-          className="mt-4 text-5xl tracking-tighter text-foreground md:text-7xl"
-        >
-          <span className="font-sans font-semibold">Compare</span>{" "}
-          <em className="font-serif font-normal italic text-primary">
-            npm packages
-          </em>
-          <span className="mt-2 block font-sans font-semibold bg-gradient-to-r from-muted-foreground to-muted-foreground/30 bg-clip-text text-transparent">
-            with confidence
-          </span>
-        </motion.h1>
+      <div className="container hero__inner">
+        <div className="hero__text" ref={textRef}>
+          <h1 id="hero-head">Compare npm packages with confidence</h1>
+          <p className="lead">
+            Real downloads, bundle size and GitHub activity, side by side.
+          </p>
+          <div className="hero__actions">
+            <SearchBar />
+            {sample && (
+              <Link href={compareHref(sample.a, sample.b)} className="key">
+                Try {sample.a} vs {sample.b}
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
 
-        {/* Divider */}
-        <motion.div
-          variants={fadeUp}
-          transition={{ duration: 0.5 }}
-          className="mx-auto mt-8 h-px w-16 bg-border"
-        />
-
-        {/* Subtitle */}
-        <motion.p
-          variants={fadeUp}
-          transition={{ duration: 0.5 }}
-          className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg"
-        >
-          Stop guessing. Compare packages using real data like downloads,
-          bundle size, and performance — all in one place.
-        </motion.p>
-
-        {/* Search */}
-        <motion.div
-          variants={fadeUp}
-          transition={{ duration: 0.5 }}
-          className="mt-10"
-        >
-          <SearchBar />
-        </motion.div>
-      </motion.div>
+      <p className="hero__caption">
+        Each lane is a popular comparison; glyph density follows its real weekly downloads.
+      </p>
     </section>
   );
 }
