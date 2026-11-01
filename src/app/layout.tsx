@@ -1,26 +1,33 @@
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { DM_Sans, Space_Mono } from "next/font/google";
+import { Familjen_Grotesk, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 
 import { CompareFloatingBar } from "@/components/global/compare-floating-bar";
 import { ScrollToTop } from "@/components/global/scroll-to-top";
 import { ScrollToTopOnNavigate } from "@/components/global/scroll-to-top-on-navigate";
 import { Header } from "@/components/layout/header";
+import { GlobalSearch } from "@/components/search/global-search";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
-const dmSans = DM_Sans({
+const familjen = Familjen_Grotesk({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["500", "600"],
+  variable: "--font-familjen",
 });
 
-const spaceMono = Space_Mono({
+const plex = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-mono",
+  variable: "--font-plex",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains",
 });
 
 const description = "Compare npm packages side by side. Downloads, bundle size, GitHub stats and more."
@@ -51,23 +58,25 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("h-full antialiased", dmSans.variable, spaceMono.variable)}
+      className={cn(familjen.variable, plex.variable, jetbrains.variable)}
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem={false}
           disableTransitionOnChange
         >
+          <a className="skip" href="#main">
+            Skip to content
+          </a>
           <Header />
           <QueryProvider>
-            <div className="bg-grid-overlay" />
-            <div className="bg-noise-overlay" />
+            <GlobalSearch />
             <CompareFloatingBar />
             <ScrollToTopOnNavigate />
             <ScrollToTop />
-              {children}
+            {children}
           </QueryProvider>
         </ThemeProvider>
       </body>

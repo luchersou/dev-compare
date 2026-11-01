@@ -1,49 +1,15 @@
-import {
-  Calendar,
-  Globe,
-  Package,
-  Scale,
-  User,
-} from "lucide-react"
-import Link from "next/link"
-
-import { GithubIcon } from "@/components/shared/icons"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Container } from "@/components/layout/container"
 import { PackageDetails } from "@/types/global"
-
-const accentColors = [
-  "var(--gradient-accent-1)",
-  "var(--gradient-accent-2)",
-  "var(--gradient-accent-3)",
-  "var(--gradient-accent-4)",
-  "var(--gradient-accent-5)",
-  "var(--gradient-accent-6)",
-]
 
 interface PackageMetadataProps {
   pkg: PackageDetails
 }
 
-interface MetadataRowProps {
-  icon: React.ReactNode
-  label: string
-  children: React.ReactNode
-}
-
-function MetadataRow({ icon, label, children }: MetadataRowProps) {
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 py-3 border-b last:border-0">
-      <span className="mt-0.5 text-muted-foreground shrink-0">{icon}</span>
-      <div className="min-w-0 flex-1">
-        <p className="text-xs text-muted-foreground mb-1">{label}</p>
-        <div className="text-sm font-medium break-words">{children}</div>
-      </div>
+    <div className="meta-row">
+      <dt>{label}</dt>
+      <dd>{children}</dd>
     </div>
   )
 }
@@ -62,91 +28,61 @@ export function PackageMetadata({ pkg }: PackageMetadataProps) {
   if (!hasContent) return null
 
   return (
-    <section className="px-4 py-6 md:px-6 md:py-8">
-      <div className="mx-auto max-w-5xl">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Package Info</CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-2">
-            {pkg.license && (
-              <MetadataRow icon={<Scale size={15} />} label="License">
-                <Badge variant="secondary">{pkg.license}</Badge>
-              </MetadataRow>
-            )}
+    <section className="pkg-section" aria-labelledby="info-title">
+      <Container className="pkg-split">
+        <h2 id="info-title" className="pkg-section__title">Package info</h2>
+        <dl className="meta-list">
+          {pkg.license && <Row label="License">{pkg.license}</Row>}
 
-            {pkg.author && (
-              <MetadataRow icon={<User size={15} />} label="Author">
-                {pkg.author}
-              </MetadataRow>
-            )}
+          {pkg.author && <Row label="Author">{pkg.author}</Row>}
 
-            {pkg.publishedAt && (
-              <MetadataRow icon={<Calendar size={15} />} label="Latest release">
+          {pkg.publishedAt && (
+            <Row label="Latest release">
+              <time dateTime={pkg.publishedAt}>
                 {new Date(pkg.publishedAt).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
                 })}
-              </MetadataRow>
-            )}
+              </time>
+            </Row>
+          )}
 
-            {pkg.homepage && (
-              <MetadataRow icon={<Globe size={15} />} label="Homepage">
-                <Link
-                  href={pkg.homepage}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-primary hover:underline underline-offset-4 truncate"
-                >
-                  {pkg.homepage.replace(/^https?:\/\//, "")}
-                </Link>
-              </MetadataRow>
-            )}
+          {pkg.homepage && (
+            <Row label="Homepage">
+              <a href={pkg.homepage} target="_blank" rel="noopener noreferrer" className="link meta-row__url">
+                {pkg.homepage.replace(/^https?:\/\//, "")}
+              </a>
+            </Row>
+          )}
 
-            {pkg.repository && (
-              <MetadataRow icon={<GithubIcon />} label="Repository">
-                <Link
-                  href={pkg.repository}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-primary hover:underline underline-offset-4 truncate"
-                >
-                  {pkg.repository.replace(/^https?:\/\/(www\.)?github\.com\//, "")}
-                </Link>
-              </MetadataRow>
-            )}
+          {pkg.repository && (
+            <Row label="Repository">
+              <a href={pkg.repository} target="_blank" rel="noopener noreferrer" className="link meta-row__url">
+                {pkg.repository.replace(/^https?:\/\/(www\.)?github\.com\//, "")}
+              </a>
+            </Row>
+          )}
 
-            {depCount > 0 && (
-              <MetadataRow icon={<Package size={15} />} label="Dependencies">
-                <span className="tabular-nums">
-                  {depCount} {depCount === 1 ? "dependency" : "dependencies"}
-                </span>
-              </MetadataRow>
-            )}
+          {depCount > 0 && (
+            <Row label="Dependencies">
+              <span className="num">
+                {depCount} {depCount === 1 ? "dependency" : "dependencies"}
+              </span>
+            </Row>
+          )}
 
-            {pkg.keywords && pkg.keywords.length > 0 && (
-              <MetadataRow
-                icon={<span className="text-[11px] font-bold text-muted-foreground">#</span>}
-                label="Keywords"
-              >
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {pkg.keywords.slice(0, 12).map((kw, i) => (
-                    <Badge
-                      key={kw}
-                      variant="outline"
-                      className="text-xs font-normal"
-                      style={{ borderColor: accentColors[i % accentColors.length] }}
-                    >
-                      {kw}
-                    </Badge>
-                  ))}
-                </div>
-              </MetadataRow>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          {pkg.keywords && pkg.keywords.length > 0 && (
+            <Row label="Keywords">
+              <ul className="keywords">
+                {pkg.keywords.slice(0, 12).map((kw) => (
+                  <li key={kw} className="cut-s">{kw}</li>
+                ))}
+              </ul>
+            </Row>
+          )}
+        </dl>
+      </Container>
     </section>
   )
 }

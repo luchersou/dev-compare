@@ -21,16 +21,10 @@ export async function CompareContent({ searchParams }: CompareContentProps) {
   ])
 
   return (
-		<>
-			<CompareFadeSection delay={0}>
-				<CompareHeader pkgA={pkgA} pkgB={pkgB} />
-			</CompareFadeSection>
-			<CompareFadeSection delay={0.12}>
-				<CompareStatsTable pkgA={pkgA} pkgB={pkgB} />
-			</CompareFadeSection>
-			<CompareFadeSection delay={0.24}>
-				<CompareVerdict pkgA={pkgA} pkgB={pkgB} />
-			</CompareFadeSection>
-		</>
-	)
+    <CompareFadeSection>
+      <CompareHeader pkgA={pkgA} pkgB={pkgB} />
+      <CompareStatsTable pkgA={pkgA} pkgB={pkgB} />
+      <CompareVerdict pkgA={pkgA} pkgB={pkgB} />
+    </CompareFadeSection>
+  )
 }

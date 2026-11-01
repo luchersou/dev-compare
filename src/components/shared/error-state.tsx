@@ -1,3 +1,5 @@
+import { CircleAlert } from "lucide-react";
+
 interface ErrorStateProps {
   message?: string;
   onRetry?: () => void;
@@ -5,16 +7,14 @@ interface ErrorStateProps {
 
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
-    <div className="p-6 text-sm text-center">
-      <p className="text-red-500 mb-2">
+    <div className="error-state" role="alert">
+      <p className="status status--bad">
+        <CircleAlert aria-hidden="true" />
         {message ?? "Something went wrong"}
       </p>
 
       {onRetry && (
-        <button
-          onClick={onRetry}
-          className="text-xs underline text-muted-foreground hover:text-foreground transition"
-        >
+        <button type="button" onClick={onRetry} className="key key--sm">
           Try again
         </button>
       )}

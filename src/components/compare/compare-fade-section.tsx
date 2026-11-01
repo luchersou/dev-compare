@@ -1,18 +1,8 @@
-"use client"
-
-import { motion } from "motion/react"
-
-export function CompareFadeSection({ children, delay = 0 }: { 
+// Was a fade-in that left the page blank until JavaScript ran; the compare
+// page is now visible as soon as it streams in.
+export function CompareFadeSection({ children }: {
   children: React.ReactNode
-  delay?: number 
+  delay?: number
 }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
-    >
-      {children}
-    </motion.div>
-  )
+  return <>{children}</>
 }

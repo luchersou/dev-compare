@@ -1,7 +1,6 @@
-import { AlertTriangle, CheckCircle,PackageOpen, Zap } from "lucide-react"
+import { CircleAlert, CircleCheck } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Container } from "@/components/layout/container"
 import { formatSize } from "@/lib/utils"
 import { PackageDetails } from "@/types/global"
 
@@ -9,34 +8,11 @@ interface BundleDetailsProps {
   pkg: PackageDetails
 }
 
-function getSizeRating(gzip: number): {
-  label: string
-  color: string
-} {
-  if (gzip < 5 * 1024) return { label: "Tiny", color: "var(--gradient-accent-2)" }
-  if (gzip < 20 * 1024) return { label: "Small", color: "var(--gradient-accent-1)" }
-  if (gzip < 50 * 1024) return { label: "Medium", color: "var(--gradient-accent-4)" }
-  return { label: "Large", color: "var(--destructive)" }
-}
-
-interface SizeCardProps {
-  label: string
-  icon: React.ReactNode
-  bytes: number
-  description: string
-}
-
-function SizeCard({ label, icon, bytes, description }: SizeCardProps) {
-  return (
-    <div className="flex flex-col gap-1 rounded-lg border bg-muted/30 p-4">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        {icon}
-        {label}
-      </div>
-      <span className="text-2xl font-bold tabular-nums">{formatSize(bytes)}</span>
-      <p className="text-xs text-muted-foreground">{description}</p>
-    </div>
-  )
+function getSizeRating(gzip: number): { label: string; good: boolean } {
+  if (gzip < 5 * 1024) return { label: "Tiny", good: true }
+  if (gzip < 20 * 1024) return { label: "Small", good: true }
+  if (gzip < 50 * 1024) return { label: "Medium", good: true }
+  return { label: "Large", good: false }
 }
 
 export function BundleDetails({ pkg }: BundleDetailsProps) {
@@ -45,66 +21,59 @@ export function BundleDetails({ pkg }: BundleDetailsProps) {
   const { size, gzip, hasSideEffects, hasJSModule } = pkg.bundle
   const rating = getSizeRating(gzip)
   const compressionRatio = ((1 - gzip / size) * 100).toFixed(0)
+  const RatingIcon = rating.good ? CircleCheck : CircleAlert
 
   return (
-    <section className="px-4 py-6 md:px-6 md:py-8">
-      <div className="mx-auto max-w-5xl">
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">Bundle Size</CardTitle>
-              <Badge
-                variant="outline"
-                style={{ borderColor: rating.color, color: rating.color }}
-                className="text-xs font-medium"
-              >
-                {rating.label}
-              </Badge>
+    <section className="pkg-section" aria-labelledby="bundle-title">
+      <Container className="pkg-split">
+        <div className="pkg-split__head">
+          <h2 id="bundle-title" className="pkg-section__title">Bundle size</h2>
+          <p className={`status ${rating.good ? "status--good" : "status--bad"}`}>
+            <RatingIcon aria-hidden="true" />
+            {rating.label}
+          </p>
+        </div>
+
+        <div className="bundle">
+          <dl className="bundle__figures">
+            <div className="stat">
+              <dt>Minified</dt>
+              <dd className="num">{formatSize(size)}</dd>
             </div>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-
-            {/* Size cards */}
-            <div className="grid grid-cols-2 gap-3">
-              <SizeCard
-                label="Minified"
-                icon={<PackageOpen size={13} />}
-                bytes={size}
-                description="Minified size"
-              />
-              <SizeCard
-                label="Gzipped"
-                icon={<Zap size={13} />}
-                bytes={gzip}
-                description={`${compressionRatio}% smaller with gzip`}
-              />
+            <div className="stat">
+              <dt>Gzipped</dt>
+              <dd className="num">{formatSize(gzip)}</dd>
+              <dd className="stat__note">{compressionRatio}% smaller with gzip</dd>
             </div>
+          </dl>
 
-            {/* Flags */}
-            {(hasSideEffects !== undefined || hasJSModule !== undefined) && (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {hasSideEffects !== undefined && (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    {hasSideEffects ? (
-                      <AlertTriangle size={13} className="text-yellow-500" />
-                    ) : (
-                      <CheckCircle size={13} className="text-green-500" />
-                    )}
-                    {hasSideEffects ? "Has side effects" : "No side effects"}
-                  </div>
-                )}
-                {hasJSModule && (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <CheckCircle size={13} className="text-green-500" />
-                    ES Module
-                  </div>
-                )}
-              </div>
-            )}
+          {/* Gzipped share of the minified size, drawn to scale. */}
+          <div
+            className="bundle__bar"
+            role="img"
+            aria-label={`Gzipped is ${100 - Number(compressionRatio)}% of the minified size`}
+          >
+            <span style={{ width: `${Math.max(2, 100 - Number(compressionRatio))}%` }} />
+          </div>
 
-          </CardContent>
-        </Card>
-      </div>
+          {(hasSideEffects !== undefined || hasJSModule) && (
+            <ul className="bundle__flags">
+              {hasSideEffects !== undefined && (
+                <li className={`status ${hasSideEffects ? "status--bad" : "status--good"}`}>
+                  {hasSideEffects ? <CircleAlert aria-hidden="true" /> : <CircleCheck aria-hidden="true" />}
+                  {hasSideEffects ? "Has side effects" : "No side effects"}
+                </li>
+              )}
+              {hasJSModule && (
+                <li className="status status--good">
+                  <CircleCheck aria-hidden="true" />
+                  ES Module
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
+      </Container>
     </section>
   )
 }
