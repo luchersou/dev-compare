@@ -1,6 +1,8 @@
 /* Hallmark · shape: Feature Stack (/), app screen (/package, /compare) · genre: modern-minimal · theme: Cobalt (by request) · redesign: full · draw: 4769b5 · job: try · modes: light+dark
  * hero: Corridor (/) · nav: floating pill · footer: statement · imagery: the product (screenshots via capture.mjs, the live comparison) · signature: the head-to-head field, real weekly downloads flowing in from both edges and meeting at the gate
  * axes: light/grotesk-sans/cool · posture: restrained · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · waive 24b · the key's 3px margin-bottom equals its 3px bottom edge · keys sit on their edge without shifting the row below */
+/* Hallmark · dropped onAddToCompare, onClick setTheme(theme === "dark") · same behaviour, inlined: the compare toggle moved into the packages table row, the theme toggle reads isDark */
 /* Hallmark · pre-emit critique: P4 H5 E4 S5 R4 V4 · weakest: P, a comparison tool argues little on its own; the hero field makes the argument (real traffic, two sides, one gate) instead of a tagline */
 @import "tailwindcss";
 @import "./tokens.css";
@@ -76,7 +78,7 @@
   justify-content: center;
   gap: var(--space-xs);
   min-height: 48px;
-  margin-bottom: 3px;
+  margin-bottom: var(--key-edge);
   padding: 0 var(--space-lg);
   border: var(--rule-hair) solid var(--color-rule-2);
   border-radius: var(--radius-input);
@@ -94,12 +96,12 @@
 .key:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 .key:disabled, .key[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; transform: none; }
 .key[aria-busy="true"] { cursor: progress; }
-.key[aria-pressed="true"] { transform: translateY(3px); box-shadow: var(--shadow-key-press); background: var(--color-paper-3); }
+.key[aria-pressed="true"], .key[aria-selected="true"] { transform: translateY(3px); box-shadow: var(--shadow-key-press); background: var(--color-paper-3); }
 .key--primary { border-color: var(--color-accent-edge); background: var(--color-accent); color: var(--color-accent-ink); box-shadow: var(--shadow-key-accent); }
 .key--primary:hover { background: var(--color-accent-deep); }
 .key--primary[aria-pressed="true"] { background: var(--color-accent-deep); }
-.key--sm { min-height: 40px; padding: 0 var(--space-md); font-size: var(--text-sm); }
-.key--icon { width: 40px; min-height: 40px; padding: 0; }
+.key--sm { min-height: 44px; padding: 0 var(--space-md); font-size: var(--text-sm); }
+.key--icon { width: 44px; min-height: 44px; padding: 0; }
 .key svg { width: 16px; height: 16px; flex-shrink: 0; }
 
 /* Cut panels: two opposite corners bevelled where corner-shape exists. */
@@ -176,7 +178,7 @@
 
 .footer { margin-top: var(--section-gap); padding-block: var(--space-3xl) var(--space-xl); border-top: var(--rule-hair) solid var(--color-rule); }
 .footer__inner { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap-columns); row-gap: var(--space-xl); }
-.footer__statement { grid-column: 1 / span 9; max-width: 22ch; font: 600 var(--text-display-s)/1.04 var(--font-display); letter-spacing: var(--tracking-display); color: var(--color-ink); text-wrap: balance; }
+.footer__statement { grid-column: 1 / span 9; max-width: 22ch; text-wrap: balance; font: 600 var(--text-display-s)/1.04 var(--font-display); letter-spacing: var(--tracking-display); color: var(--color-ink); text-wrap: balance; }
 .footer__links { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-lg); padding-top: var(--space-lg); border-top: var(--rule-hair) solid var(--color-rule); }
 .footer__links small { margin-left: auto; color: var(--color-muted); font: 400 var(--text-sm)/1.4 var(--font-body); }
 @media (max-width: 60rem) { .footer__statement { grid-column: 1 / -1; } }
@@ -195,7 +197,7 @@
 
 /* The floating compare tray and the scroll key. */
 .tray { position: fixed; bottom: var(--space-md); left: 50%; z-index: var(--z-sticky); translate: -50% 0; display: flex; align-items: center; gap: var(--space-sm); max-width: calc(100% - 2 * var(--space-md)); padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-md); border: var(--rule-hair) solid var(--color-rule-2); border-radius: var(--radius-card); background: var(--color-paper); box-shadow: var(--shadow-panel); }
-.dark .tray { background: var(--color-paper-2); }
+.dark .tray { background: var(--color-paper-2); color: var(--color-ink); }
 @media (prefers-reduced-motion: no-preference) {
   .tray { animation: tray-in var(--dur-short) var(--ease-out); }
   @keyframes tray-in { from { opacity: 0; transform: translateY(16px); } }
@@ -213,6 +215,8 @@
 .scroll-key { position: fixed; right: var(--space-lg); bottom: var(--space-lg); z-index: var(--z-raised); }
 @media (max-width: 40rem) { .tray__slot { max-width: 96px; } .scroll-key { display: none; } }
 
+.dialog-overlay { background: color-mix(in oklab, var(--color-graphite) 55%, transparent); }
+
 /* ── Search dialog ───────────────────────────────────────────────── */
 
 .search-dialog { top: 15%; translate: -50% 0; width: calc(100% - 2 * var(--space-md)); max-width: 720px; padding: 0; gap: 0; border-color: var(--color-rule-2); background: var(--color-paper); box-shadow: var(--shadow-panel); }
@@ -229,13 +233,13 @@
 .search-item__name .mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .search-item__version { flex-shrink: 0; color: var(--color-muted); font: 400 var(--text-sm)/1 var(--font-outlier); }
 .search-item__desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-muted); font-size: var(--text-sm); }
-.search-item__add { margin-bottom: 3px; }
+.search-item__add { margin-bottom: var(--key-edge); }
 .search-skeleton { display: grid; gap: var(--space-md); padding: var(--space-md); }
 .search-skeleton__row { display: grid; gap: var(--space-xs); }
 .error-state { display: grid; justify-items: center; gap: var(--space-md); padding: var(--space-xl) var(--space-md); }
 
 /* The large search trigger, a cut field with keycaps. */
-.search-key { display: flex; align-items: center; gap: var(--space-sm); width: 100%; max-width: 560px; min-height: 56px; padding: 0 var(--space-sm) 0 var(--space-md); border: var(--rule-hair) solid var(--color-muted); border-radius: var(--radius-input); background: var(--color-paper); color: var(--color-muted); font: 400 var(--text-lead)/1 var(--font-body); text-align: left; cursor: pointer; box-shadow: var(--shadow-card); transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out); }
+.search-key { display: flex; align-items: center; gap: var(--space-sm); width: 100%; max-width: 560px; min-height: 52px; padding: 0 var(--space-sm) 0 var(--space-md); border: var(--rule-hair) solid var(--color-muted); border-radius: var(--radius-input); background: var(--color-paper); color: var(--color-muted); font: 400 var(--text-lead)/1 var(--font-body); text-align: left; cursor: pointer; box-shadow: var(--shadow-card); transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out); }
 @supports (corner-shape: bevel) { .search-key { border-radius: var(--cut) 3px var(--cut) 3px; corner-shape: bevel round bevel round; } }
 .search-key:hover { border-color: var(--color-ink-2); }
 .search-key:active { background: var(--color-paper-2); }
@@ -248,7 +252,7 @@
 
 .status-page { display: flex; align-items: center; min-height: 80dvh; }
 .status-page__inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; column-gap: var(--gap-columns); }
-.status-page__code { font-size: clamp(6rem, 16vw, 14rem); line-height: 1; color: var(--color-accent); letter-spacing: -0.04em; }
+.status-page__code { font-size: clamp(6rem, 16vw, 14rem); line-height: 1; color: var(--color-ink); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
 .status-page__text { display: grid; gap: var(--space-lg); }
 .status-page__text .lead { color: var(--color-ink-2); }
 .status-page__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); }

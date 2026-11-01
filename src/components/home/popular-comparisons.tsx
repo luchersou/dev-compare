@@ -91,7 +91,6 @@ export function PopularComparisons({ data }: PopularComparisonsProps) {
                   role="tab"
                   id={`duel-tab-${i}`}
                   aria-selected={i === current}
-                  aria-pressed={i === current}
                   aria-controls={`duel-panel-${i}`}
                   tabIndex={i === current ? 0 : -1}
                   className="key key--sm"

@@ -33,7 +33,7 @@ export function DataSources() {
 
   return (
     <section className="band band--graphite" aria-labelledby="sources-title">
-      <div className="container">
+      <Container>
         <div className="sources__head">
           <h2 id="sources-title">Four public sources, one verdict</h2>
           <p className="lead">No API keys. Every figure comes from these endpoints, cached for an hour.</p>
@@ -83,7 +83,7 @@ export function DataSources() {
             ))}
           </ul>
         </div>
-      </div>
+      </Container>
     </section>
   )
 }

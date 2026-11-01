@@ -52,9 +52,9 @@ export function CompareHeader({ pkgA, pkgB }: CompareHeaderProps) {
         </nav>
 
         <h1 id="cmp-title" className="cmp-hero__title">
-          <span className="mono">{pkgA.name}</span>
-          <span className="cmp-hero__vs">vs</span>
-          <span className="mono">{pkgB.name}</span>
+          <span>{pkgA.name}</span>
+          <span>vs</span>
+          <span>{pkgB.name}</span>
         </h1>
 
         <div className="cmp-hero__ids">

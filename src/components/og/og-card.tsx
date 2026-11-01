@@ -1,14 +1,16 @@
+import { OG_COLORS } from "@/config/brand-colors"
+
 // Rendered by next/og (Satori): inline styles only, and every element with
 // more than one child needs display: flex.
 
 export const OG_SIZE = { width: 1200, height: 630 }
 
 const colors = {
-  background: "#0a0a0a",
-  foreground: "#fafafa",
-  muted: "#a1a1aa",
-  accent: "#8b5cf6",
-  border: "#27272a",
+  background: OG_COLORS.background,
+  foreground: OG_COLORS.foreground,
+  muted: OG_COLORS.muted,
+  accent: OG_COLORS.accent,
+  border: OG_COLORS.rule,
 }
 
 interface OgCardProps {
@@ -34,7 +36,7 @@ export function OgCard({ eyebrow, title, subtitle }: OgCardProps) {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 32 }}>
         {/* Same arrows as app/icon.tsx; a text glyph would make next/og fetch a font at runtime. */}
-        <svg width="44" height="44" viewBox="0 0 22 22" fill="none">
+        <svg width="44" height="44" viewBox="0 0 22 22" fill="none" aria-hidden="true">
           <line x1="2" y1="7" x2="20" y2="7" stroke={colors.accent} strokeWidth="2" strokeLinecap="round" />
           <polyline points="15,3 20,7 15,11" stroke={colors.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
           <line x1="20" y1="15" x2="2" y2="15" stroke={colors.accent} strokeWidth="2" strokeLinecap="round" />

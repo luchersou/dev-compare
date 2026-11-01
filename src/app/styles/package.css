@@ -1,4 +1,4 @@
-/* Package page: an app screen in the Cobalt material (stamp in globals.css). */
+/* Hallmark · package styles of the Cobalt redesign; the full stamp, critique and waivers are in globals.css */
 
 .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); color: var(--color-muted); font: 400 var(--text-sm)/1.4 var(--font-body); }
 .crumbs .mono { color: var(--color-ink); }
