@@ -14,32 +14,27 @@ export interface FieldLane {
 
 interface HeroFieldProps {
   lanes: FieldLane[]
-  /** The hero's text block: no glyph is drawn under it. */
-  calmRef: RefObject<HTMLElement | null>
+  /** Elements the field keeps clear of: the text block and the caption. */
+  calmRefs: Array<RefObject<HTMLElement | null>>
 }
 
 // The Cobalt cell: every glyph sits on an 8 by 16 grid.
 const CELL_W = 8
 const CELL_H = 16
 const FPS = 30
-// Densest to lightest; a packet's head is dense and its tail thins out.
-const RAMP = ["@", "%", "#", "*", "+", "=", "-", ":", "."]
+const SPEED = 9 // cells per second, both streams flow inward
+// Densest to lightest.
+const RAMP = ["@", "%", "#", "*", "+", "=", "-", ":"]
 const LENS_RADIUS = 120
-
-interface Packet {
-  x: number // cells travelled from the outer edge
-  len: number
-  speed: number // cells per second
-}
+const NARROW = 960
 
 interface Side {
   name: string
   downloads: number | null
-  rate: number // packets per second
-  len: number
-  packets: Packet[]
-  clock: number
+  w: number // 0..1, from weekly downloads
+  leads: boolean
   flash: number // seconds left on the gate flash
+  beat: number // arrivals so far, drives the flash
 }
 
 interface Lane {
@@ -48,9 +43,17 @@ interface Lane {
   right: Side
 }
 
+interface Rows {
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
 interface Palette {
   rail: string
-  glyph: string[]
+  tones: string[] // light to dense
+  lead: string
   accent: string
   label: string
   labelStrong: string
@@ -58,24 +61,18 @@ interface Palette {
 }
 
 // Weekly downloads span five orders of magnitude, so the field follows the
-// log, scaled to the busiest package on screen: the side that leads is denser.
+// log, scaled to the busiest package on screen.
 function weight(downloads: number | null, max: number) {
   if (!downloads || downloads <= 0 || max <= 0) return 0
   const floor = 4 // 10k a week reads as a trickle
   return Math.min(1, Math.max(0, (Math.log10(downloads) - floor) / (Math.log10(max) - floor)))
 }
 
-function makeSide(name: string, downloads: number | null, max: number): Side {
-  const w = weight(downloads, max) ** 2
-  return {
-    name,
-    downloads,
-    rate: 0.12 + w * 1.1,
-    len: 2 + Math.round(w * 9),
-    packets: [],
-    clock: Math.random(),
-    flash: 0,
-  }
+// A stable pseudo-random value per lane, side and moving cell.
+function hash(a: number, b: number, c: number) {
+  let h = (a * 374761393 + b * 668265263 + c * 2147483647) | 0
+  h = Math.imul(h ^ (h >>> 13), 1274126177)
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296
 }
 
 function readPalette(): Palette {
@@ -83,15 +80,16 @@ function readPalette(): Palette {
   const v = (name: string) => css.getPropertyValue(name).trim()
   return {
     rail: v("--color-glyph-1"),
-    glyph: [v("--color-accent-deep"), v("--color-glyph-4"), v("--color-glyph-3"), v("--color-glyph-2")],
+    tones: [v("--color-glyph-2"), v("--color-glyph-3"), v("--color-glyph-4")],
+    lead: v("--color-accent-deep"),
     accent: v("--color-accent"),
     label: v("--color-muted"),
     labelStrong: v("--color-ink"),
-    gate: v("--color-glyph-2"),
+    gate: v("--color-glyph-3"),
   }
 }
 
-export function HeroField({ lanes, calmRef }: HeroFieldProps) {
+export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [paused, setPaused] = useState(false)
   const pausedRef = useRef(false)
@@ -110,20 +108,33 @@ export function HeroField({ lanes, calmRef }: HeroFieldProps) {
     const monoFamily =
       getComputedStyle(document.documentElement).getPropertyValue("--font-jetbrains").trim() ||
       "ui-monospace, monospace"
-
     const busiest = Math.max(1, ...lanes.flatMap((l) => [l.aDownloads ?? 0, l.bDownloads ?? 0]))
+
     let palette = readPalette()
     let width = 0
     let height = 0
     let cols = 0
-    let rows = 0
-    let calm = { top: 0, bottom: 0, left: 0, right: 0 }
+    let text: Rows = { top: -1, bottom: -1, left: 0, right: 0 }
     let state: Lane[] = []
     let pointer: { x: number; y: number } | null = null
     let visible = true
     let raf = 0
     let last = 0
     let acc = 0
+    // Start mid-flow so the first paint already shows both sides arriving.
+    let time = 12
+
+    function measure(el: HTMLElement | null, rect: DOMRect, padX: number, padY: number): Rows | null {
+      if (!el) return null
+      const r = el.getBoundingClientRect()
+      if (!r.width || !r.height) return null
+      return {
+        left: Math.floor((r.left - rect.left) / CELL_W) - padX,
+        right: Math.ceil((r.right - rect.left) / CELL_W) + padX,
+        top: Math.floor((r.top - rect.top) / CELL_H) - padY,
+        bottom: Math.ceil((r.bottom - rect.top) / CELL_H) + padY,
+      }
+    }
 
     function layout() {
       const rect = canvas!.getBoundingClientRect()
@@ -134,54 +145,57 @@ export function HeroField({ lanes, calmRef }: HeroFieldProps) {
       canvas!.height = Math.round(height * dpr)
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
       cols = Math.floor(width / CELL_W)
-      rows = Math.floor(height / CELL_H)
+      const rows = Math.floor(height / CELL_H)
+      const narrow = width < NARROW
 
-      const text = calmRef.current?.getBoundingClientRect()
-      if (text) {
-        const pad = 3
-        calm = {
-          left: Math.floor((text.left - rect.left) / CELL_W) - pad * 2,
-          right: Math.ceil((text.right - rect.left) / CELL_W) + pad * 2,
-          top: Math.floor((text.top - rect.top) / CELL_H) - pad,
-          bottom: Math.ceil((text.bottom - rect.top) / CELL_H) + pad,
-        }
+      const [textEl, ...others] = calmRefs.map((r) => r.current)
+      text = measure(textEl, rect, 6, 2) ?? text
+      const blocked = others
+        .map((el) => measure(el, rect, 0, 1))
+        .filter((r): r is Rows => r !== null)
+
+      // A lane and its label (the row above) must stay clear of the caption
+      // everywhere, and of the text too on a narrow screen.
+      const clear = (row: number) => {
+        const hits = (r: Rows) => row >= r.top && row - 1 <= r.bottom
+        if (blocked.some(hits)) return false
+        if (narrow && hits(text)) return false
+        return true
       }
 
-      // Lanes spread over the hero, clear of the nav at the top.
       const firstRow = 7
-      const lastRow = rows - 7
-      const count = Math.min(lanes.length, Math.max(3, Math.floor((lastRow - firstRow) / 3)))
-      const step = (lastRow - firstRow) / Math.max(1, count - 1)
-      const previous = state
-      state = lanes.slice(0, count).map((lane, i) => ({
-        row: Math.round(firstRow + i * step),
-        left: previous[i]?.left ?? makeSide(lane.a, lane.aDownloads, busiest),
-        right: previous[i]?.right ?? makeSide(lane.b, lane.bDownloads, busiest),
-      }))
+      const candidates: number[] = []
+      for (let row = firstRow; row < rows - 2; row += 4) if (clear(row)) candidates.push(row)
+
+      state = candidates.slice(0, lanes.length).map((row, i) => {
+        const lane = lanes[i]
+        const wa = weight(lane.aDownloads, busiest)
+        const wb = weight(lane.bDownloads, busiest)
+        return {
+          row,
+          left: { name: lane.a, downloads: lane.aDownloads, w: wa, leads: wa > wb, flash: 0, beat: 0 },
+          right: { name: lane.b, downloads: lane.bDownloads, w: wb, leads: wb > wa, flash: 0, beat: 0 },
+        }
+      })
     }
 
     // Where a lane's two streams stop: either side of the text, or the centre.
     function gate(row: number) {
-      const crossesText = row >= calm.top && row <= calm.bottom
-      if (crossesText) return { left: calm.left, right: calm.right }
+      if (row >= text.top && row <= text.bottom) return { left: text.left, right: text.right }
       const mid = Math.floor(cols / 2)
-      return { left: mid - 2, right: mid + 2 }
+      return { left: mid - 3, right: mid + 3 }
     }
 
     function step(dt: number) {
+      time += dt
       for (const lane of state) {
-        const g = gate(lane.row)
-        const reach = { left: g.left, right: cols - g.right }
-        for (const [side, span] of [[lane.left, reach.left], [lane.right, reach.right]] as const) {
-          side.clock += dt * side.rate
-          while (side.clock >= 1) {
-            side.clock -= 1
-            side.packets.push({ x: -side.len, len: side.len, speed: 7 + Math.random() * 5 })
+        for (const side of [lane.left, lane.right]) {
+          // Arrivals per second follow the weight; each one lights the gate.
+          const beat = Math.floor(time * (0.4 + side.w * 2.2))
+          if (beat !== side.beat) {
+            side.beat = beat
+            side.flash = 0.25
           }
-          for (const p of side.packets) p.x += p.speed * dt
-          const arrived = side.packets.filter((p) => p.x >= span)
-          if (arrived.length) side.flash = 0.35
-          side.packets = side.packets.filter((p) => p.x < span)
           side.flash = Math.max(0, side.flash - dt)
         }
       }
@@ -199,45 +213,51 @@ export function HeroField({ lanes, calmRef }: HeroFieldProps) {
         if (!list) buckets.set(color, (list = []))
         list.push([ch, cx * CELL_W, cy * CELL_H])
       }
-      const inLens = (cx: number, cy: number) => {
-        if (!pointer) return false
+      const lens = (cx: number, cy: number) => {
+        if (!pointer) return 0
         const dx = cx * CELL_W + CELL_W / 2 - pointer.x
         const dy = cy * CELL_H + CELL_H / 2 - pointer.y
-        return dx * dx + dy * dy < LENS_RADIUS * LENS_RADIUS
+        const d = Math.sqrt(dx * dx + dy * dy)
+        return d < LENS_RADIUS ? 1 - d / LENS_RADIUS : 0
       }
 
-      let hovered: Lane | null = null
-      for (const lane of state) {
+      let hovered = null as Lane | null
+      state.forEach((lane, li) => {
         const g = gate(lane.row)
         const y = lane.row
         if (pointer && Math.abs(pointer.y - (y * CELL_H + CELL_H / 2)) < CELL_H * 1.5) hovered = lane
 
-        // The rails: one hairline of dots per side, from the edge to the gate.
-        for (let x = 0; x < g.left; x += 2) put(inLens(x, y) ? palette.gate : palette.rail, "·", x, y)
-        for (let x = g.right + 1; x < cols; x += 2) put(inLens(x, y) ? palette.gate : palette.rail, "·", x, y)
-
-        // The gate posts, lit for a moment when a packet arrives.
-        put(lane.left.flash > 0 ? palette.accent : palette.gate, "┤", g.left, y)
-        put(lane.right.flash > 0 ? palette.accent : palette.gate, "├", g.right, y)
-
-        // Packets: dense heads leading inward, tails thinning toward the edge.
-        const paint = (side: Side, toX: (d: number) => number, limit: (x: number) => boolean) => {
-          for (const p of side.packets) {
-            for (let k = 0; k < p.len; k++) {
-              const d = Math.floor(p.x) - k
-              if (d < 0) continue
-              const x = toX(d)
-              if (!limit(x)) continue
-              const t = k / p.len
-              const ch = RAMP[Math.min(RAMP.length - 1, Math.floor(t * RAMP.length))]
-              const tone = inLens(x, y) ? 0 : Math.min(palette.glyph.length - 1, Math.floor(t * palette.glyph.length))
-              put(palette.glyph[tone], ch, x, y)
+        const stream = (side: Side, sideId: number, span: number, toX: (d: number) => number) => {
+          const density = 0.1 + side.w * 0.72
+          for (let d = 0; d < span; d++) {
+            const x = toX(d)
+            const q = d / Math.max(1, span - 1) // 0 at the edge, 1 at the gate
+            const k = Math.floor(d - time * SPEED)
+            const bank = q > 0.82 ? ((q - 0.82) / 0.18) * (0.25 + side.w * 0.6) : 0
+            const dens = Math.min(0.97, density * (0.6 + 0.4 * q) + bank)
+            const h = hash(li + 1, sideId, k)
+            const boost = lens(x, y)
+            if (h < dens + boost * 0.3) {
+              const i = Math.min(1, (dens - h) * 1.6 + q * 0.35 * side.w + boost * 0.4)
+              const ch = RAMP[Math.min(RAMP.length - 1, Math.floor((1 - i) * RAMP.length))]
+              const color =
+                i > 0.82 && (side.leads || boost > 0.2)
+                  ? palette.lead
+                  : palette.tones[Math.min(palette.tones.length - 1, Math.floor(i * palette.tones.length))]
+              put(color, ch, x, y)
+            } else if (d % 2 === 0) {
+              put(boost > 0 ? palette.tones[0] : palette.rail, "·", x, y)
             }
           }
         }
-        paint(lane.left, (d) => d, (x) => x < g.left)
-        paint(lane.right, (d) => cols - 1 - d, (x) => x > g.right)
-      }
+
+        stream(lane.left, 1, g.left, (d) => d)
+        stream(lane.right, 2, cols - 1 - g.right, (d) => cols - 1 - d)
+
+        // The gate posts, lit as each arrival lands.
+        put(lane.left.flash > 0 ? palette.accent : palette.gate, "┤", g.left, y)
+        put(lane.right.flash > 0 ? palette.accent : palette.gate, "├", g.right, y)
+      })
 
       for (const [color, list] of buckets) {
         ctx!.fillStyle = color
@@ -286,14 +306,8 @@ export function HeroField({ lanes, calmRef }: HeroFieldProps) {
       if (!raf && !reduceMotion) raf = requestAnimationFrame(frame)
     }
 
-    // One composed still: run the field for a while, then draw once.
-    function still() {
-      for (let i = 0; i < 6 * FPS; i++) step(1 / FPS)
-      draw()
-    }
-
     layout()
-    still()
+    draw()
     canvas.dataset.ready = "true"
     schedule()
 
@@ -336,7 +350,7 @@ export function HeroField({ lanes, calmRef }: HeroFieldProps) {
       hero?.removeEventListener("pointermove", onMove)
       hero?.removeEventListener("pointerleave", onLeave)
     }
-  }, [lanes, calmRef])
+  }, [lanes, calmRefs])
 
   return (
     <>

@@ -23,6 +23,7 @@ export function CloseSection() {
               width={1440}
               height={1080}
               sizes="(max-width: 960px) 100vw, 760px"
+              loading="eager"
             />
             <Image
               className="screen--dark"
@@ -31,6 +32,7 @@ export function CloseSection() {
               width={1440}
               height={1080}
               sizes="(max-width: 960px) 100vw, 760px"
+              loading="eager"
             />
           </div>
           <figcaption>The verdict for zod vs yup, weighted across four categories.</figcaption>

@@ -57,9 +57,9 @@ export function PopularPackages({ data }: PopularPackagesProps) {
                     </div>
                   </td>
                   <td className="index__version hide-md">{pkg.version ?? "—"}</td>
-                  <td className="index__fig">{formatDownloads(pkg.weeklyDownloads ?? 0)}</td>
-                  <td className="index__fig hide-sm">{formatSize(pkg.gzipSize ?? 0)}</td>
-                  <td className="index__fig hide-md">{formatStars(pkg.stars ?? 0)}</td>
+                  <td className="index__fig">{formatDownloads(pkg.weeklyDownloads || null)}</td>
+                  <td className="index__fig hide-sm">{formatSize(pkg.gzipSize || null)}</td>
+                  <td className="index__fig hide-md">{pkg.stars ? formatStars(pkg.stars) : "—"}</td>
                   <td>
                     <button
                       type="button"

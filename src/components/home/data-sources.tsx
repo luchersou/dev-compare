@@ -35,8 +35,8 @@ export function DataSources() {
     <section className="band band--graphite" aria-labelledby="sources-title">
       <Container>
         <div className="sources__head">
-          <h2 id="sources-title">Four public sources, one verdict</h2>
-          <p className="lead">No API keys. Every figure comes from these endpoints, cached for an hour.</p>
+          <h2 id="sources-title">Four endpoints, no API keys</h2>
+          <p className="lead">Every figure on DevCompare comes from these, cached for an hour.</p>
         </div>
 
         <div className="mapping">

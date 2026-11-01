@@ -15,6 +15,8 @@ interface HeroProps {
 
 export function Hero({ comparisons }: HeroProps) {
   const textRef = useRef<HTMLDivElement>(null);
+  const captionRef = useRef<HTMLParagraphElement>(null);
+  const calmRefs = useMemo(() => [textRef, captionRef], []);
   const lanes = useMemo<FieldLane[]>(
     () =>
       comparisons.map(({ pair, a, b }) => ({
@@ -29,7 +31,7 @@ export function Hero({ comparisons }: HeroProps) {
 
   return (
     <section className="hero" aria-labelledby="hero-head">
-      <HeroField lanes={lanes} calmRef={textRef} />
+      <HeroField lanes={lanes} calmRefs={calmRefs} />
 
       <div className="container hero__inner">
         <div className="hero__text" ref={textRef}>
@@ -48,7 +50,7 @@ export function Hero({ comparisons }: HeroProps) {
         </div>
       </div>
 
-      <p className="hero__caption">
+      <p className="hero__caption" ref={captionRef}>
         Each lane is a popular comparison; glyph density follows its real weekly downloads.
       </p>
     </section>

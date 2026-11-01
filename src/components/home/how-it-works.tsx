@@ -55,7 +55,7 @@ export function HowItWorks() {
         <div className="stack__screens">
           {SCREENS.map((screen, i) => (
             <figure key={screen.name} className="screen">
-              <div className="screen__frame cut" data-kind="product">
+              <div className={screen.name === "search" ? "screen__frame screen__frame--fit cut" : "screen__frame cut"} data-kind="product">
                 <Image
                   className="screen--light"
                   src={`/images/screens/${screen.name}-light.webp`}
