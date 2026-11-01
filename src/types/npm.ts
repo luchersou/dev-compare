@@ -9,11 +9,13 @@ export interface NpmManifest {
   homepage?: string
   license?: string
   author?: string | { name: string; email?: string }
-  repository?: {
-    type: string
-    url: string
-    directory?: string
-  }
+  repository?:
+    | string
+    | {
+        type: string
+        url: string
+        directory?: string
+      }
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
 }

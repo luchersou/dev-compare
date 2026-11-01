@@ -1,5 +1,5 @@
 import { POPULAR_PACKAGES } from "@/config/popular-packages"
-import { extractGithubRepo } from "@/lib/github"
+import { extractGithubRepo, rawRepositoryUrl } from "@/lib/github"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchDownloads } from "@/services/api/downloads"
 import { fetchGithubRepo } from "@/services/api/github"
@@ -9,7 +9,7 @@ import type { PackageSummary } from "@/types/global"
 
 export async function getPackageSummary(name: string): Promise<PackageSummary> {
   const npmData = await fetchNpmPackage(name)
-  const repoPath = extractGithubRepo(npmData.repository?.url)
+  const repoPath = extractGithubRepo(rawRepositoryUrl(npmData.repository))
 
   const [downloads, bundle, github] = await Promise.allSettled([
     fetchDownloads(name),

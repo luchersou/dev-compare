@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import { extractGithubRepo } from "@/lib/github"
+import { extractGithubRepo, normalizeRepositoryUrl, rawRepositoryUrl } from "@/lib/github"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchDownloads } from "@/services/api/downloads"
 import { fetchGithubRepo } from "@/services/api/github"
@@ -16,7 +16,8 @@ export async function getPackageDetails(name: string): Promise<PackageDetails> {
     fetchPublishedAt(name),
   ])
 
-  const repoPath = extractGithubRepo(npmData.repository?.url)
+  const repoUrl = rawRepositoryUrl(npmData.repository)
+  const repoPath = extractGithubRepo(repoUrl)
   let github = null
   if (repoPath) {
     github = await fetchGithubRepo(repoPath)
@@ -32,7 +33,7 @@ export async function getPackageDetails(name: string): Promise<PackageDetails> {
       ? npmData.author
       : npmData.author?.name,
     homepage: npmData.homepage,
-    repository: npmData.repository?.url?.replace(/^git\+/, "").replace(/\.git$/, ""),
+    repository: normalizeRepositoryUrl(repoUrl),
     keywords: npmData.keywords,
     dependencies: npmData.dependencies,
     publishedAt,
