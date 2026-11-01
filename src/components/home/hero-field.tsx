@@ -22,7 +22,11 @@ interface HeroFieldProps {
 const CELL_W = 8
 const CELL_H = 16
 const FPS = 30
-const SPEED = 9 // cells per second, both streams flow inward
+const SPEED = 2.6 // cells per second, both streams flow inward
+// The hover distortion: glyphs within WARP_RADIUS are pushed away from the
+// pointer by up to WARP_PUSH pixels, like a lens bulging the field.
+const WARP_RADIUS = 160
+const WARP_PUSH = 14
 // Densest to lightest.
 const RAMP = ["@", "%", "#", "*", "+", "=", "-", ":"]
 const LENS_RADIUS = 120
@@ -117,6 +121,9 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
     let text: Rows = { top: -1, bottom: -1, left: 0, right: 0 }
     let state: Lane[] = []
     let pointer: { x: number; y: number } | null = null
+    // The lens trails the pointer and fades in and out, so the warp feels soft.
+    let lensAt: { x: number; y: number } | null = null
+    let warp = 0
     let visible = true
     let raf = 0
     let last = 0
@@ -188,10 +195,17 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
 
     function step(dt: number) {
       time += dt
+      warp += ((pointer ? 1 : 0) - warp) * Math.min(1, dt * 6)
+      if (pointer) {
+        const t = Math.min(1, dt * 10)
+        lensAt = lensAt
+          ? { x: lensAt.x + (pointer.x - lensAt.x) * t, y: lensAt.y + (pointer.y - lensAt.y) * t }
+          : { ...pointer }
+      }
       for (const lane of state) {
         for (const side of [lane.left, lane.right]) {
           // Arrivals per second follow the weight; each one lights the gate.
-          const beat = Math.floor(time * (0.4 + side.w * 2.2))
+          const beat = Math.floor(time * (0.15 + side.w * 0.7))
           if (beat !== side.beat) {
             side.beat = beat
             side.flash = 0.25
@@ -211,7 +225,19 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
       const put = (color: string, ch: string, cx: number, cy: number) => {
         let list = buckets.get(color)
         if (!list) buckets.set(color, (list = []))
-        list.push([ch, cx * CELL_W, cy * CELL_H])
+        let px = cx * CELL_W
+        let py = cy * CELL_H
+        if (!reduceMotion && lensAt && warp > 0.01) {
+          const dx = px + CELL_W / 2 - lensAt.x
+          const dy = py + CELL_H / 2 - lensAt.y
+          const d = Math.sqrt(dx * dx + dy * dy)
+          if (d > 0.5 && d < WARP_RADIUS) {
+            const f = (1 - d / WARP_RADIUS) ** 2 * WARP_PUSH * warp
+            px += (dx / d) * f
+            py += (dy / d) * f * 0.8
+          }
+        }
+        list.push([ch, px, py])
       }
       const lens = (cx: number, cy: number) => {
         if (!pointer) return 0
@@ -333,11 +359,19 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
     const onMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect()
       pointer = { x: e.clientX - rect.left, y: e.clientY - rect.top }
-      if (reduceMotion || pausedRef.current) draw()
+      if (reduceMotion || pausedRef.current) {
+        // No loop is running: jump the lens straight to the pointer.
+        lensAt = { ...pointer }
+        warp = 1
+        draw()
+      }
     }
     const onLeave = () => {
       pointer = null
-      if (reduceMotion || pausedRef.current) draw()
+      if (reduceMotion || pausedRef.current) {
+        warp = 0
+        draw()
+      }
     }
     hero?.addEventListener("pointermove", onMove)
     hero?.addEventListener("pointerleave", onLeave)
