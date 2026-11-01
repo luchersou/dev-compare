@@ -43,6 +43,20 @@ describe("GET /api/search", () => {
     ])
   })
 
+  it("encodes the query before calling npm", async () => {
+    const fetchMock = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ objects: [] }),
+    })
+    global.fetch = fetchMock
+
+    await GET(makeRequest("c++ & more"))
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://registry.npmjs.org/-/v1/search?text=c%2B%2B%20%26%20more&size=10"
+    )
+  })
+
   it("returns an empty array when the npm API responds with an error", async () => {
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: false,

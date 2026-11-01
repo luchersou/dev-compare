@@ -4,7 +4,7 @@ const BASE_BUNDLE = "https://bundlephobia.com/api"
 
 export async function fetchBundle(name: string): Promise<BundlePhobiaResponse | null> {
   try {
-    const res = await fetch(`${BASE_BUNDLE}/size?package=${name}`, {
+    const res = await fetch(`${BASE_BUNDLE}/size?package=${encodeURIComponent(name)}`, {
       next: { revalidate: 60 * 60 }, // Revalidate every 1 hour
     })
 

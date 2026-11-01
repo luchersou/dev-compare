@@ -13,7 +13,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const res = await fetch(`${BASE_NPM}?text=${query}&size=10`);
+    const res = await fetch(`${BASE_NPM}?text=${encodeURIComponent(query)}&size=10`);
 
     if (!res.ok) {
       return NextResponse.json<NpmSearchResult[]>([]);
