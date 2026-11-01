@@ -12,7 +12,7 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
 }))
 
-jest.mock("framer-motion", () => ({
+jest.mock("motion/react", () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   motion: {
     div: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

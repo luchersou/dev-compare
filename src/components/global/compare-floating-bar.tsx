@@ -1,7 +1,7 @@
 "use client"
 
-import { AnimatePresence, motion } from "framer-motion"
 import { GitCompareArrows, Plus,X } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"

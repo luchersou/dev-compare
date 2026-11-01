@@ -1,7 +1,7 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Workflow } from "lucide-react"
+import { motion } from "motion/react"
 
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"

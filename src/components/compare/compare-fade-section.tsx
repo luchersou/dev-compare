@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 
 export function CompareFadeSection({ children, delay = 0 }: { 
   children: React.ReactNode
