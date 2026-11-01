@@ -35,9 +35,9 @@ const SCREENS = [
 ]
 
 export function HowItWorks() {
-  // Steps reveal one by one as their screen scrolls into view; the first
-  // one is there with the heading. Revealed steps stay revealed.
-  const [revealed, setRevealed] = useState(1)
+  // Only the step whose screen is crossing the viewport's reading line is
+  // shown; scrolling either way swaps it in place.
+  const [active, setActive] = useState(0)
   const screensRef = useRef<Array<HTMLElement | null>>([])
 
   useEffect(() => {
@@ -46,11 +46,11 @@ export function HowItWorks() {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue
           const index = screensRef.current.indexOf(entry.target as HTMLElement)
-          if (index >= 0) setRevealed((count) => Math.max(count, index + 1))
+          if (index >= 0) setActive(index)
         }
       },
-      // A screen counts once its top passes 40% up the viewport.
-      { rootMargin: "0px 0px -40% 0px" }
+      // A one-pixel line 45% down the viewport: the screen on it is active.
+      { rootMargin: "-45% 0px -55% 0px" }
     )
     for (const el of screensRef.current) if (el) observer.observe(el)
     return () => observer.disconnect()
@@ -63,7 +63,10 @@ export function HowItWorks() {
           <h2 id="how-title">From search to decision in seconds</h2>
           <ol className="steps">
             {STEPS.map((step, i) => (
-              <li key={step.title} data-revealed={i < revealed}>
+              <li
+                key={step.title}
+                data-state={i < active ? "before" : i > active ? "after" : "active"}
+              >
                 <h3>{step.title}</h3>
                 <p>{step.description}</p>
                 <ul className="steps__tags" aria-label="Data used">
