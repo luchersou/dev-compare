@@ -21,8 +21,7 @@ interface HeroFieldProps {
 // The Cobalt cell: every glyph sits on an 8 by 16 grid.
 const CELL_W = 8
 const CELL_H = 16
-const FPS = 30
-const SPEED = 2.6 // cells per second, both streams flow inward
+const SPEED = 2.4 // cells per second, both streams flow inward
 // The hover distortion: glyphs within WARP_RADIUS are pushed away from the
 // pointer by up to WARP_PUSH pixels, like a lens bulging the field.
 const WARP_RADIUS = 160
@@ -30,6 +29,7 @@ const WARP_PUSH = 14
 // Densest to lightest.
 const RAMP = ["@", "%", "#", "*", "+", "=", "-", ":"]
 const LENS_RADIUS = 120
+const FLASH = 0.6 // seconds a gate post takes to fade back after an arrival
 const NARROW = 960
 
 interface Side {
@@ -127,7 +127,6 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
     let visible = true
     let raf = 0
     let last = 0
-    let acc = 0
     // Start mid-flow so the first paint already shows both sides arriving.
     let time = 12
 
@@ -208,7 +207,7 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
           const beat = Math.floor(time * (0.15 + side.w * 0.7))
           if (beat !== side.beat) {
             side.beat = beat
-            side.flash = 0.25
+            side.flash = FLASH
           }
           side.flash = Math.max(0, side.flash - dt)
         }
@@ -220,11 +219,15 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
       ctx!.textBaseline = "top"
       ctx!.font = `13px ${monoFamily}`
 
-      // Buckets by colour keep fillStyle changes to a handful per frame.
+      // Buckets by colour and opacity keep canvas state changes to a handful
+      // per frame. Opacity is quantised to tenths.
       const buckets = new Map<string, Array<[string, number, number]>>()
-      const put = (color: string, ch: string, cx: number, cy: number) => {
-        let list = buckets.get(color)
-        if (!list) buckets.set(color, (list = []))
+      const put = (color: string, ch: string, cx: number, cy: number, alpha = 1) => {
+        const a = Math.round(Math.min(1, alpha) * 10) / 10
+        if (a <= 0) return
+        const key = `${a}|${color}`
+        let list = buckets.get(key)
+        if (!list) buckets.set(key, (list = []))
         let px = cx * CELL_W
         let py = cy * CELL_H
         if (!reduceMotion && lensAt && warp > 0.01) {
@@ -240,11 +243,15 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
         list.push([ch, px, py])
       }
       const lens = (cx: number, cy: number) => {
-        if (!pointer) return 0
-        const dx = cx * CELL_W + CELL_W / 2 - pointer.x
-        const dy = cy * CELL_H + CELL_H / 2 - pointer.y
+        if (!lensAt || warp <= 0.01) return 0
+        const dx = cx * CELL_W + CELL_W / 2 - lensAt.x
+        const dy = cy * CELL_H + CELL_H / 2 - lensAt.y
         const d = Math.sqrt(dx * dx + dy * dy)
-        return d < LENS_RADIUS ? 1 - d / LENS_RADIUS : 0
+        return d < LENS_RADIUS ? (1 - d / LENS_RADIUS) * warp : 0
+      }
+      const smooth = (a: number, b: number, x: number) => {
+        const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
+        return t * t * (3 - 2 * t)
       }
 
       let hovered = null as Lane | null
@@ -253,42 +260,70 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
         const y = lane.row
         if (pointer && Math.abs(pointer.y - (y * CELL_H + CELL_H / 2)) < CELL_H * 1.5) hovered = lane
 
-        const stream = (side: Side, sideId: number, span: number, toX: (d: number) => number) => {
-          const density = 0.1 + side.w * 0.72
-          for (let d = 0; d < span; d++) {
-            const x = toX(d)
-            const q = d / Math.max(1, span - 1) // 0 at the edge, 1 at the gate
-            const k = Math.floor(d - time * SPEED)
-            const bank = q > 0.82 ? ((q - 0.82) / 0.18) * (0.25 + side.w * 0.6) : 0
-            const dens = Math.min(0.97, density * (0.6 + 0.4 * q) + bank)
+        // Each glyph is a fixed cell of the stream (index k) sliding inward at
+        // SPEED, so it keeps its character and tone from the edge to the gate;
+        // only its position and opacity change, and both change smoothly.
+        const stream = (side: Side, sideId: number, span: number, toX: (pos: number) => number) => {
+          if (span < 2) return
+          const density = 0.12 + side.w * 0.62
+          const offset = time * SPEED
+          const base = Math.floor(offset)
+          const frac = offset - base
+          const near = new Float32Array(span + 2) // how much a glyph covers each cell
+
+          for (let j = -1; j <= span; j++) {
+            const pos = j + frac // cells from the edge
+            if (pos < 0 || pos > span - 1) continue
+            const k = j - base
             const h = hash(li + 1, sideId, k)
-            const boost = lens(x, y)
-            if (h < dens + boost * 0.3) {
-              const i = Math.min(1, (dens - h) * 1.6 + q * 0.35 * side.w + boost * 0.4)
-              const ch = RAMP[Math.min(RAMP.length - 1, Math.floor((1 - i) * RAMP.length))]
-              const color =
-                i > 0.82 && (side.leads || boost > 0.2)
-                  ? palette.lead
-                  : palette.tones[Math.min(palette.tones.length - 1, Math.floor(i * palette.tones.length))]
-              put(color, ch, x, y)
-            } else if (d % 2 === 0) {
-              put(boost > 0 ? palette.tones[0] : palette.rail, "·", x, y)
-            }
+            // Near the gate the stream banks up: a second, denser set fades in.
+            const q = pos / (span - 1)
+            const banked = h < density ? 1 : h < density + 0.3 * side.w ? smooth(0.7, 1, q) : 0
+            if (banked <= 0) continue
+
+            const fade = smooth(0, 3, pos) * (1 - smooth(span - 3, span - 1, pos))
+            const alpha = banked * fade
+            const cell = Math.floor(pos)
+            near[cell] = Math.max(near[cell], alpha * (1 - (pos - cell)))
+            near[cell + 1] = Math.max(near[cell + 1], alpha * (pos - cell))
+
+            const t = hash(sideId, li + 7, k) // the glyph's own intensity
+            const i = Math.min(1, 0.25 + t * 0.55 + side.w * 0.25)
+            const ch = RAMP[Math.min(RAMP.length - 1, Math.floor((1 - i) * RAMP.length))]
+            const tone = palette.tones[Math.min(palette.tones.length - 1, Math.floor(i * palette.tones.length))]
+            const x = toX(pos)
+            // The leading side turns cobalt as it reaches the gate; the lens
+            // lights whatever it passes over. Both cross-fade.
+            const glow = Math.max(side.leads ? smooth(0.72, 1, q) * i : 0, lens(x, y))
+            put(tone, ch, x, y, alpha * (1 - glow))
+            put(palette.lead, ch, x, y, alpha * glow)
+          }
+
+          // The rail: fixed dots that dim under a passing glyph.
+          for (let d = 0; d < span; d += 2) {
+            const a = 1 - Math.min(1, near[d] * 1.5)
+            put(palette.rail, "·", toX(d), y, a)
           }
         }
 
-        stream(lane.left, 1, g.left, (d) => d)
-        stream(lane.right, 2, cols - 1 - g.right, (d) => cols - 1 - d)
+        stream(lane.left, 1, g.left, (pos) => pos)
+        stream(lane.right, 2, cols - 1 - g.right, (pos) => cols - 1 - pos)
 
-        // The gate posts, lit as each arrival lands.
-        put(lane.left.flash > 0 ? palette.accent : palette.gate, "┤", g.left, y)
-        put(lane.right.flash > 0 ? palette.accent : palette.gate, "├", g.right, y)
+        // The gate posts, lit as each arrival lands and fading back.
+        for (const [side, x, ch] of [[lane.left, g.left, "┤"], [lane.right, g.right, "├"]] as const) {
+          const lit = Math.min(1, side.flash / FLASH)
+          put(palette.gate, ch, x, y, 1 - lit)
+          put(palette.accent, ch, x, y, lit)
+        }
       })
 
-      for (const [color, list] of buckets) {
-        ctx!.fillStyle = color
+      for (const [key, list] of buckets) {
+        const bar = key.indexOf("|")
+        ctx!.globalAlpha = Number(key.slice(0, bar))
+        ctx!.fillStyle = key.slice(bar + 1)
         for (const [ch, px, py] of list) ctx!.fillText(ch, px, py)
       }
+      ctx!.globalAlpha = 1
 
       // Lane labels at the outer edges; the hovered lane shows its numbers.
       ctx!.font = `12px ${monoFamily}`
@@ -317,14 +352,12 @@ export function HeroField({ lanes, calmRefs }: HeroFieldProps) {
         schedule()
         return
       }
+      // Every animation frame: requestAnimationFrame already follows the
+      // display, and skipping frames is what makes slow motion stutter.
       const dt = Math.min(0.1, (now - (last || now)) / 1000)
       last = now
-      acc += dt
-      if (acc >= 1 / FPS) {
-        step(acc)
-        draw()
-        acc = 0
-      }
+      step(dt)
+      draw()
       schedule()
     }
 
