@@ -1,4 +1,5 @@
 import { POPULAR_COMPARISONS } from "@/config/popular-comparisons"
+import { OPTIONAL_SOURCE_TIMEOUT, withTimeout } from "@/lib/timeout"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchDownloadsByPeriod } from "@/services/api/downloads"
 import type { ComparisonCardData } from "@/types/compare"
@@ -6,8 +7,8 @@ import type { PackageSnapshot } from "@/types/compare"
 
 async function fetchPackageSnapshot(name: string): Promise<PackageSnapshot> {
   const [downloads, bundle] = await Promise.allSettled([
-    fetchDownloadsByPeriod(name, "last-week"),
-    fetchBundle(name),
+    withTimeout(fetchDownloadsByPeriod(name, "last-week"), OPTIONAL_SOURCE_TIMEOUT, null),
+    withTimeout(fetchBundle(name), OPTIONAL_SOURCE_TIMEOUT, null, `bundle ${name}`),
   ])
 
   return {

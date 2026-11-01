@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 
 import { extractGithubRepo, normalizeRepositoryUrl, rawRepositoryUrl } from "@/lib/github"
+import { OPTIONAL_SOURCE_TIMEOUT, withTimeout } from "@/lib/timeout"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchDownloads } from "@/services/api/downloads"
 import { fetchGithubRepo } from "@/services/api/github"
@@ -8,20 +9,25 @@ import { fetchNpmPackage, fetchPublishedAt, PackageNotFoundError } from "@/servi
 import { PackageDetails } from "@/types/global"
 
 export async function getPackageDetails(name: string): Promise<PackageDetails> {
-  const npmData = await fetchNpmPackage(name)
-
-  const [downloads, bundle, publishedAt] = await Promise.all([
-    fetchDownloads(name),
-    fetchBundle(name),
-    fetchPublishedAt(name),
+  // Everything except GitHub only needs the package name, so start it all
+  // at once; GitHub waits for the repository url from the manifest.
+  const extrasPromise = Promise.all([
+    withTimeout(fetchDownloads(name), OPTIONAL_SOURCE_TIMEOUT, null, `downloads ${name}`),
+    withTimeout(fetchBundle(name), OPTIONAL_SOURCE_TIMEOUT, null, `bundle ${name}`),
+    withTimeout(fetchPublishedAt(name), OPTIONAL_SOURCE_TIMEOUT, undefined, `publish date ${name}`),
   ])
+
+  const npmData = await fetchNpmPackage(name)
 
   const repoUrl = rawRepositoryUrl(npmData.repository)
   const repoPath = extractGithubRepo(repoUrl)
-  let github = null
-  if (repoPath) {
-    github = await fetchGithubRepo(repoPath)
-  }
+
+  const [[downloads, bundle, publishedAt], github] = await Promise.all([
+    extrasPromise,
+    repoPath
+      ? withTimeout(fetchGithubRepo(repoPath), OPTIONAL_SOURCE_TIMEOUT, null, `github ${repoPath}`)
+      : null,
+  ])
 
   return {
     name: npmData.name,
@@ -56,6 +62,7 @@ export async function getPackageDetails(name: string): Promise<PackageDetails> {
       : undefined,
   }
 }
+
 // Unknown packages render the not-found page; any other failure bubbles up
 // to the nearest error boundary.
 export async function getPackageDetailsOrNotFound(name: string): Promise<PackageDetails> {

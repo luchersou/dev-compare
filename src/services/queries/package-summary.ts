@@ -1,29 +1,36 @@
 import { POPULAR_PACKAGES } from "@/config/popular-packages"
 import { extractGithubRepo, rawRepositoryUrl } from "@/lib/github"
+import { OPTIONAL_SOURCE_TIMEOUT, withTimeout } from "@/lib/timeout"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchDownloadsByPeriod } from "@/services/api/downloads"
 import { fetchGithubRepo } from "@/services/api/github"
 import { fetchNpmPackage } from "@/services/api/npm"
 import type { PackageSummary } from "@/types/global"
 
-
 export async function getPackageSummary(name: string): Promise<PackageSummary> {
+  // The optional sources catch their own errors and resolve to null.
+  const extrasPromise = Promise.all([
+    withTimeout(fetchDownloadsByPeriod(name, "last-week"), OPTIONAL_SOURCE_TIMEOUT, null),
+    withTimeout(fetchBundle(name), OPTIONAL_SOURCE_TIMEOUT, null, `bundle ${name}`),
+  ])
+
   const npmData = await fetchNpmPackage(name)
   const repoPath = extractGithubRepo(rawRepositoryUrl(npmData.repository))
 
-  const [downloads, bundle, github] = await Promise.allSettled([
-    fetchDownloadsByPeriod(name, "last-week"),
-    fetchBundle(name),
-    repoPath ? fetchGithubRepo(repoPath) : Promise.resolve(null),
+  const [[downloads, bundle], github] = await Promise.all([
+    extrasPromise,
+    repoPath
+      ? withTimeout(fetchGithubRepo(repoPath), OPTIONAL_SOURCE_TIMEOUT, null, `github ${repoPath}`)
+      : null,
   ])
 
   return {
     name: npmData.name,
     version: npmData.version,
     description: npmData.description,
-    weeklyDownloads: downloads.status === "fulfilled" ? (downloads.value ?? undefined) : undefined,
-    gzipSize: bundle.status === "fulfilled" ? bundle.value?.gzip : undefined,
-    stars: github.status === "fulfilled" ? github.value?.stargazers_count : undefined,
+    weeklyDownloads: downloads ?? undefined,
+    gzipSize: bundle?.gzip,
+    stars: github?.stargazers_count,
   }
 }
 
