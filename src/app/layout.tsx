@@ -7,6 +7,7 @@ import { CompareFloatingBar } from "@/components/global/compare-floating-bar";
 import { ScrollToTop } from "@/components/global/scroll-to-top";
 import { ScrollToTopOnNavigate } from "@/components/global/scroll-to-top-on-navigate";
 import { Header } from "@/components/layout/header";
+import { SITE_NAME, SITE_URL } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -22,12 +23,23 @@ const spaceMono = Space_Mono({
   variable: "--font-mono",
 });
 
+const description = "Compare npm packages side by side. Downloads, bundle size, GitHub stats and more."
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "DevCompare — Compare npm packages",
-    template: "%s — DevCompare",
+    default: `${SITE_NAME} — Compare npm packages`,
+    template: `%s — ${SITE_NAME}`,
   },
-  description: "Compare npm packages side by side. Downloads, bundle size, GitHub stats and more.",
+  description,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    description,
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 }
 
 export default function RootLayout({
