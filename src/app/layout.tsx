@@ -1,7 +1,7 @@
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { Familjen_Grotesk, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 
 import { CompareFloatingBar } from "@/components/global/compare-floating-bar";
 import { ScrollToTop } from "@/components/global/scroll-to-top";
@@ -13,21 +13,31 @@ import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
-const familjen = Familjen_Grotesk({
-  subsets: ["latin"],
-  weight: ["500", "600"],
+// Self-hosted (OFL) variable fonts, latin subset. next/font/google failed
+// intermittently under Turbopack when Google answered with /l/font?kit= URLs,
+// and hosting them also removes a network fetch from every build.
+const familjen = localFont({
+  src: "./fonts/familjen-grotesk-latin.woff2",
+  weight: "400 700",
+  display: "swap",
   variable: "--font-familjen",
+  adjustFontFallback: "Arial",
 });
 
-const plex = IBM_Plex_Sans({
-  subsets: ["latin"],
+const plex = localFont({
+  src: "./fonts/ibm-plex-sans-latin.woff2",
+  weight: "100 700",
+  display: "swap",
   variable: "--font-plex",
+  adjustFontFallback: "Arial",
 });
 
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const jetbrains = localFont({
+  src: "./fonts/jetbrains-mono-latin.woff2",
+  weight: "100 800",
+  display: "swap",
   variable: "--font-jetbrains",
+  adjustFontFallback: false,
 });
 
 const description = "Compare npm packages side by side. Downloads, bundle size, GitHub stats and more."
