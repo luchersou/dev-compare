@@ -3,22 +3,30 @@
 import { Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 import { GithubIcon } from "@/components/shared/icons";
 import { cn } from "@/lib/utils";
 
-export function Header() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+function subscribeToScroll(onChange: () => void) {
+  window.addEventListener("scroll", onChange, { passive: true });
+  return () => window.removeEventListener("scroll", onChange);
+}
 
-  useEffect(() => {
-    setMounted(true);
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+function subscribeNoop() {
+  return () => {};
+}
+
+export function Header() {
+  const scrolled = useSyncExternalStore(
+    subscribeToScroll,
+    () => window.scrollY > 10,
+    () => false
+  );
+  // false on the server and during hydration, true afterwards, so the theme
+  // icon only renders once the client knows the theme.
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
+  const { theme, setTheme } = useTheme();
 
   return (
     <header

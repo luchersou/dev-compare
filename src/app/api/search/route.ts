@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 
 import { NpmSearchResult } from "@/types/npm";
 
+interface NpmSearchResponse {
+  objects: { package: NpmSearchResult }[];
+}
+
 const BASE_NPM = "https://registry.npmjs.org/-/v1/search";
 
 export async function GET(req: Request) {
@@ -19,16 +23,16 @@ export async function GET(req: Request) {
       return NextResponse.json<NpmSearchResult[]>([]);
     }
 
-    const data = await res.json();
+    const data = (await res.json()) as NpmSearchResponse;
 
-    const results: NpmSearchResult[] = data.objects.map((item: any) => ({
+    const results: NpmSearchResult[] = data.objects.map((item) => ({
       name: item.package.name,
       description: item.package.description, 
       version: item.package.version,
     }));
 
     return NextResponse.json(results);
-  } catch (error) {
+  } catch {
     return NextResponse.json<NpmSearchResult[]>([]);
   }
 }

@@ -1,10 +1,13 @@
 import { fireEvent,render, screen } from "@testing-library/react"
 
 import { useSearch } from "@/features/search/use-search"
+import type { NpmSearchResult } from "@/types/npm"
 
 import { SearchCommand } from "./search-command"
 
 // ─── mocks ────────────────────────────────────────────────────────────────────
+
+type WithChildren = { children?: React.ReactNode }
 
 jest.mock("@/features/search/use-search")
 jest.mock("@/hooks/use-debounce", () => ({
@@ -12,25 +15,33 @@ jest.mock("@/hooks/use-debounce", () => ({
 }))
 
 jest.mock("@/components/ui/dialog", () => ({
-  Dialog: ({ children }: any) => <div>{children}</div>,
-  DialogContent: ({ children }: any) => <div>{children}</div>,
+  Dialog: ({ children }: WithChildren) => <div>{children}</div>,
+  DialogContent: ({ children }: WithChildren) => <div>{children}</div>,
 }))
 
 jest.mock("@/components/ui/command", () => ({
-  Command: ({ children }: any) => <div>{children}</div>,
-  CommandInput: ({ value, onValueChange, placeholder }: any) => (
+  Command: ({ children }: WithChildren) => <div>{children}</div>,
+  CommandInput: ({
+    value,
+    onValueChange,
+    placeholder,
+  }: {
+    value: string
+    onValueChange: (value: string) => void
+    placeholder?: string
+  }) => (
     <input
       placeholder={placeholder}
       value={value}
       onChange={(e) => onValueChange(e.target.value)}
     />
   ),
-  CommandList: ({ children }: any) => <div>{children}</div>,
-  CommandEmpty: ({ children }: any) => <div>{children}</div>,
+  CommandList: ({ children }: WithChildren) => <div>{children}</div>,
+  CommandEmpty: ({ children }: WithChildren) => <div>{children}</div>,
 }))
 
 jest.mock("./search-item", () => ({
-  SearchItem: ({ pkg, onSelect }: any) => (
+  SearchItem: ({ pkg, onSelect }: { pkg: NpmSearchResult; onSelect: () => void }) => (
     <button onClick={onSelect}>{pkg.name}</button>
   ),
 }))
@@ -40,7 +51,7 @@ jest.mock("./search-skeleton", () => ({
 }))
 
 jest.mock("@/components/shared/error-state", () => ({
-  ErrorState: ({ message, onRetry }: any) => (
+  ErrorState: ({ message, onRetry }: { message?: string; onRetry?: () => void }) => (
     <div>
       <span>{message}</span>
       <button onClick={onRetry}>Retry</button>

@@ -32,7 +32,7 @@ describe("GET /api/search", () => {
           { package: { name: "vue", description: "The progressive framework", version: "3.0.0" } },
         ],
       }),
-    } as any)
+    } as Response)
 
     const res = await GET(makeRequest("react"))
     const data = await res.json()
@@ -61,7 +61,7 @@ describe("GET /api/search", () => {
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: false,
       status: 500,
-    } as any)
+    } as Response)
 
     const res = await GET(makeRequest("react"))
     const data = await res.json()

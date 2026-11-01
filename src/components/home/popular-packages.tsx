@@ -1,6 +1,6 @@
 "use client"
 
-import { Link, Package } from "lucide-react"
+import { Package } from "lucide-react"
 import { motion } from "motion/react"
 
 import { PackageCard } from "@/components/home/popular-package-card"
@@ -103,9 +103,8 @@ export function PopularPackages({ data }: PopularPackagesProps) {
                     e.preventDefault()
                     e.stopPropagation()
 
-                    packages.includes(pkg.name)
-                      ? removePackage(pkg.name)
-                      : addPackage(pkg.name)
+                    if (packages.includes(pkg.name)) removePackage(pkg.name)
+                    else addPackage(pkg.name)
                   }}
                   href={packageHref(pkg.name)}
                 />
