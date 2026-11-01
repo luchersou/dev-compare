@@ -1,4 +1,7 @@
+"use client"
+
 import Image from "next/image"
+import { useEffect, useRef, useState } from "react"
 
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
@@ -32,14 +35,35 @@ const SCREENS = [
 ]
 
 export function HowItWorks() {
+  // Steps reveal one by one as their screen scrolls into view; the first
+  // one is there with the heading. Revealed steps stay revealed.
+  const [revealed, setRevealed] = useState(1)
+  const screensRef = useRef<Array<HTMLElement | null>>([])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          const index = screensRef.current.indexOf(entry.target as HTMLElement)
+          if (index >= 0) setRevealed((count) => Math.max(count, index + 1))
+        }
+      },
+      // A screen counts once its top passes 40% up the viewport.
+      { rootMargin: "0px 0px -40% 0px" }
+    )
+    for (const el of screensRef.current) if (el) observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <Section labelledBy="how-title" gap="large">
       <Container className="stack">
         <div className="stack__pane">
           <h2 id="how-title">From search to decision in seconds</h2>
           <ol className="steps">
-            {STEPS.map((step) => (
-              <li key={step.title}>
+            {STEPS.map((step, i) => (
+              <li key={step.title} data-revealed={i < revealed}>
                 <h3>{step.title}</h3>
                 <p>{step.description}</p>
                 <ul className="steps__tags" aria-label="Data used">
@@ -54,7 +78,11 @@ export function HowItWorks() {
 
         <div className="stack__screens">
           {SCREENS.map((screen, i) => (
-            <figure key={screen.name} className="screen">
+            <figure
+              key={screen.name}
+              className="screen"
+              ref={(el) => { screensRef.current[i] = el }}
+            >
               <div className={screen.name === "search" ? "screen__frame screen__frame--fit cut" : "screen__frame cut"} data-kind="product">
                 <Image
                   className="screen--light"

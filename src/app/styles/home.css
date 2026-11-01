@@ -22,6 +22,13 @@
 .steps__tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin: var(--space-2xs) 0 0; padding: 0; list-style: none; }
 .steps__tags li { display: block; padding: var(--space-3xs) var(--space-xs); border: var(--rule-hair) solid var(--color-rule-2); border-top-width: var(--rule-hair); counter-increment: none; color: var(--color-ink-2); font-size: var(--text-sm); }
 .steps__tags li::before { content: none; }
+/* Each step waits for its screen. Hidden only once script runs (the page
+   is complete without it), only beside the pinned pane, and never under
+   reduced motion. Hidden steps keep their space, so nothing jumps. */
+@media (min-width: 60rem) and (prefers-reduced-motion: no-preference) {
+  html.js .steps > li { transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out); }
+  html.js .steps > li[data-revealed="false"] { opacity: 0; transform: translateY(12px); }
+}
 .stack__screens { display: grid; gap: var(--space-2xl); }
 .screen { margin: 0; display: grid; gap: var(--space-sm); }
 .dark .screen__frame { border-color: var(--color-rule-2); background: var(--color-graphite-2); color: var(--color-graphite-ink); }
