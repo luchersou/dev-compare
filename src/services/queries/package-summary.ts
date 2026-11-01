@@ -1,7 +1,7 @@
 import { POPULAR_PACKAGES } from "@/config/popular-packages"
 import { extractGithubRepo, rawRepositoryUrl } from "@/lib/github"
 import { fetchBundle } from "@/services/api/bundlephobia"
-import { fetchDownloads } from "@/services/api/downloads"
+import { fetchDownloadsByPeriod } from "@/services/api/downloads"
 import { fetchGithubRepo } from "@/services/api/github"
 import { fetchNpmPackage } from "@/services/api/npm"
 import type { PackageSummary } from "@/types/global"
@@ -12,7 +12,7 @@ export async function getPackageSummary(name: string): Promise<PackageSummary> {
   const repoPath = extractGithubRepo(rawRepositoryUrl(npmData.repository))
 
   const [downloads, bundle, github] = await Promise.allSettled([
-    fetchDownloads(name),
+    fetchDownloadsByPeriod(name, "last-week"),
     fetchBundle(name),
     repoPath ? fetchGithubRepo(repoPath) : Promise.resolve(null),
   ])
@@ -21,7 +21,7 @@ export async function getPackageSummary(name: string): Promise<PackageSummary> {
     name: npmData.name,
     version: npmData.version,
     description: npmData.description,
-    weeklyDownloads: downloads.status === "fulfilled" ? downloads.value?.weekly : undefined,
+    weeklyDownloads: downloads.status === "fulfilled" ? (downloads.value ?? undefined) : undefined,
     gzipSize: bundle.status === "fulfilled" ? bundle.value?.gzip : undefined,
     stars: github.status === "fulfilled" ? github.value?.stargazers_count : undefined,
   }

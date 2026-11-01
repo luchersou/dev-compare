@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
   Card,
@@ -29,38 +29,49 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function DownloadsChart({ pkg }: DownloadsChartProps) {
-  if (!pkg.downloads) return null
+function formatMonth(day: string) {
+  return new Date(day).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })
+}
 
-  const data = [
-    { period: "Weekly", downloads: pkg.downloads.weekly },
-    { period: "Monthly", downloads: pkg.downloads.monthly },
-    { period: "Yearly", downloads: pkg.downloads.yearly },
-  ]
+function formatWeek(day: unknown) {
+  return `Week of ${new Date(String(day)).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  })}`
+}
+
+export function DownloadsChart({ pkg }: DownloadsChartProps) {
+  const history = pkg.downloads?.history
+  if (!history || history.length < 2) return null
 
   return (
     <section className="px-4 py-6 md:px-6 md:py-8">
       <div className="mx-auto max-w-5xl">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Downloads</CardTitle>
-            <CardDescription>Weekly, monthly and yearly download counts</CardDescription>
+            <CardTitle className="text-base font-semibold">Weekly downloads</CardTitle>
+            <CardDescription>Downloads per week over the last 12 months</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[200px] w-full md:h-[260px]">
-              <BarChart data={data} accessibilityLayer barSize={98}>
+              <AreaChart data={history} accessibilityLayer margin={{ left: 0, right: 8 }}>
                 <defs>
-                  <linearGradient id="downloadsGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--gradient-accent-1)" />
-                    <stop offset="100%" stopColor="var(--gradient-accent-3)" />
+                  <linearGradient id="downloadsFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-downloads)" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="var(--color-downloads)" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} strokeDasharray="1 1" />
                 <XAxis
-                  dataKey="period"
+                  dataKey="week"
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fontSize: 14 }}
+                  tickMargin={8}
+                  minTickGap={32}
+                  tickFormatter={formatMonth}
+                  tick={{ fontSize: 12 }}
                 />
                 <YAxis
                   tickFormatter={formatDownloads}
@@ -70,22 +81,23 @@ export function DownloadsChart({ pkg }: DownloadsChartProps) {
                   width={48}
                 />
                 <ChartTooltip
-                  cursor={{ fill: "var(--muted)", radius: 16 }}
+                  cursor={{ stroke: "var(--border)", strokeWidth: 1 }}
                   content={
                     <ChartTooltipContent
-                      formatter={(value) => [
-                        formatDownloads(value as number),
-                        "Downloads",
-                      ]}
+                      indicator="line"
+                      labelFormatter={formatWeek}
                     />
                   }
                 />
-                <Bar
+                <Area
                   dataKey="downloads"
-                  fill="url(#downloadsGradient)"  
-                  radius={[6, 6, 0, 0]}
+                  type="monotone"
+                  stroke="var(--color-downloads)"
+                  strokeWidth={2}
+                  fill="url(#downloadsFill)"
+                  activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--background)" }}
                 />
-              </BarChart>
+              </AreaChart>
             </ChartContainer>
           </CardContent>
         </Card>

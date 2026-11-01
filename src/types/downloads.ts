@@ -5,9 +5,19 @@ export interface NpmDownloadsResponse {
   package: string
 }
 
+export interface DailyDownloads {
+  downloads: number
+  day: string
+}
+
 export interface NpmDownloadsRange {
-  downloads: {
-    downloads: number
-    day: string
-  }[]
+  start: string
+  end: string
+  package: string
+  downloads: DailyDownloads[]
+}
+
+export interface WeeklyDownloads {
+  week: string
+  downloads: number
 }

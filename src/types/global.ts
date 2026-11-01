@@ -1,3 +1,5 @@
+import type { WeeklyDownloads } from "@/types/downloads"
+
 export interface PackageDetails {
   name: string
   version: string
@@ -15,6 +17,7 @@ export interface PackageDetails {
     weekly: number
     monthly: number
     yearly: number
+    history?: WeeklyDownloads[]
   }
 
   bundle?: {

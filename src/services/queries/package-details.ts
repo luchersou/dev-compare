@@ -38,9 +38,7 @@ export async function getPackageDetails(name: string): Promise<PackageDetails> {
     dependencies: npmData.dependencies,
     publishedAt,
 
-    downloads: downloads
-      ? { weekly: downloads.weekly, monthly: downloads.monthly, yearly: downloads.yearly }
-      : undefined,
+    downloads: downloads ?? undefined,
 
     bundle: bundle
       ? { size: bundle.size, gzip: bundle.gzip }
