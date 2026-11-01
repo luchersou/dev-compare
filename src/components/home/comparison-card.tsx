@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { Card, CardContent } from "@/components/ui/card"
+import { compareHref } from "@/lib/routes"
 import { formatDownloads, formatSize } from "@/lib/utils"
 import { ComparisonCardData } from "@/types/compare"
 
@@ -48,7 +49,7 @@ function DownloadBar({
 
 export function ComparisonCard({ data }: { data: ComparisonCardData }) {
   const { pair, a, b } = data
-  const href = `/compare?a=${pair.a}&b=${pair.b}`
+  const href = compareHref(pair.a, pair.b)
 
   return (
     <Link href={href} className="group block h-full">

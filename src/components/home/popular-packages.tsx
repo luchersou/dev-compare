@@ -6,6 +6,7 @@ import { motion } from "motion/react"
 import { PackageCard } from "@/components/home/popular-package-card"
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
+import { packageHref } from "@/lib/routes"
 import { useCompareStore } from "@/store/compare.store"
 import type { PackageSummary } from "@/types/global"
 
@@ -106,7 +107,7 @@ export function PopularPackages({ data }: PopularPackagesProps) {
                       ? removePackage(pkg.name)
                       : addPackage(pkg.name)
                   }}
-                  href={`/package/${pkg.name}`}
+                  href={packageHref(pkg.name)}
                 />
               </motion.div>
             </motion.div>

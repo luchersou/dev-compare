@@ -5,6 +5,7 @@ import { GitCompareArrows, Plus,X } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
+import { compareHref } from "@/lib/routes"
 import { useCompareStore } from "@/store/compare.store"
 
 function PackageSlot({ name, onRemove }: { name: string; onRemove: () => void }) {
@@ -39,7 +40,7 @@ export function CompareFloatingBar() {
 
   function handleCompare() {
     if (!canCompare) return
-    router.push(`/compare?a=${packages[0]}&b=${packages[1]}`)
+    router.push(compareHref(packages[0], packages[1]))
   }
 
   if (packages.length === 0) return null

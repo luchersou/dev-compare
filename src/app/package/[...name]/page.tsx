@@ -2,9 +2,10 @@ import { Suspense } from "react"
 
 import { PackageContent } from "@/components/package/package-content"
 import { PackageContentSkeleton } from "@/components/package/package-content-skeleton"
+import { packageNameFromSegments } from "@/lib/routes"
 
 interface PackagePageProps {
-  params: Promise<{ name: string }>
+  params: Promise<{ name: string[] }>
 }
 
 export default function PackagePage({ params }: PackagePageProps) {
@@ -19,7 +20,7 @@ export default function PackagePage({ params }: PackagePageProps) {
 
 export async function generateMetadata({ params }: PackagePageProps) {
   const { name } = await params
-  const decodedName = decodeURIComponent(name)
+  const decodedName = packageNameFromSegments(name)
 
   try {
     const { getPackageDetails } = await import("@/services/queries/package-details")

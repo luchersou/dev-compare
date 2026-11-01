@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { CommandItem } from "@/components/ui/command";
+import { packageHref } from "@/lib/routes";
 import { generateIconColor } from "@/lib/utils";
 import { useCompareStore } from "@/store/compare.store";
 import { NpmSearchResult } from "@/types/npm";
@@ -29,7 +30,7 @@ export function SearchItem({ pkg, onSelect }: { pkg: NpmSearchResult; onSelect: 
   return (
     <CommandItem
       onSelect={() => {
-        router.push(`/package/${pkg.name}`);
+        router.push(packageHref(pkg.name));
         onSelect();
       }}
       className="group flex items-center gap-3 p-3"
