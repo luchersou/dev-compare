@@ -1,5 +1,6 @@
 import { 
   computeVerdict, 
+  formatTimeAgo,
   getBundleInsight, 
   getCommunityInsight, 
   getDownloadsInsight, 
@@ -89,6 +90,12 @@ describe("getDownloadsInsight", () => {
 			const a = makePkg({ name: "a", downloads: { weekly: 0, monthly: 1_000_000, yearly: 0 } })
 			const b = makePkg({ name: "b", downloads: { weekly: 0, monthly: 100_000, yearly: 0 } })
 			expect(getDownloadsInsight(a, b)?.reason).toContain("more popular")
+		})
+
+		it("should not round small differences to a misleading ratio", () => {
+			const a = makePkg({ name: "a", downloads: { weekly: 0, monthly: 120_000, yearly: 0 } })
+			const b = makePkg({ name: "b", downloads: { weekly: 0, monthly: 100_000, yearly: 0 } })
+			expect(getDownloadsInsight(a, b)?.reason).not.toContain("more popular")
 		})
 
 		it("should display a tie message when download numbers are equal", () => {
@@ -296,91 +303,90 @@ describe("getBundleInsight", () => {
 })
  
 // ─── getMaintenanceInsight ─────────────────────────────────────────────────
- 
+
+const NOW = new Date("2026-06-01T00:00:00Z").getTime()
+const daysAgo = (days: number) => new Date(NOW - days * 24 * 60 * 60 * 1000).toISOString()
+const withCommit = (name: string, days: number) =>
+  makePkg({ name, github: { ...makeGithub(), lastCommit: daysAgo(days) } })
+
 describe("getMaintenanceInsight", () => {
-  describe("when both packages have no issues data", () => {
+  describe("when neither package has activity data", () => {
     it("returns null", () => {
-      const a = makePkg({ name: "a" })
-      const b = makePkg({ name: "b" })
-      expect(getMaintenanceInsight(a, b)).toBeNull()
+      expect(getMaintenanceInsight(makePkg({ name: "a" }), makePkg({ name: "b" }), NOW)).toBeNull()
     })
   })
- 
+
   describe("winner", () => {
-    it("returns 'a' when a has fewer open issues", () => {
-      const a = makePkg({ name: "a", github: makeGithub({ issues: 5 }) })
-      const b = makePkg({ name: "b", github: makeGithub({ issues: 50 }) })
-      expect(getMaintenanceInsight(a, b)?.winner).toBe("a")
+    it("returns 'a' when a was updated more recently", () => {
+      expect(getMaintenanceInsight(withCommit("a", 2), withCommit("b", 200), NOW)?.winner).toBe("a")
     })
- 
-    it("returns 'b' when b has fewer open issues", () => {
-      const a = makePkg({ name: "a", github: makeGithub({ issues: 100 }) })
-      const b = makePkg({ name: "b", github: makeGithub({ issues: 10 }) })
-      expect(getMaintenanceInsight(a, b)?.winner).toBe("b")
+
+    it("returns 'b' when b was updated more recently", () => {
+      expect(getMaintenanceInsight(withCommit("a", 400), withCommit("b", 10), NOW)?.winner).toBe("b")
     })
- 
-    it("returns 'tie' when both have the same number of issues", () => {
-      const a = makePkg({ name: "a", github: makeGithub({ issues: 10 }) })
-      const b = makePkg({ name: "b", github: makeGithub({ issues: 10 }) })
-      expect(getMaintenanceInsight(a, b)?.winner).toBe("tie")
+
+    it("returns 'tie' when both were updated within 30 days of each other", () => {
+      expect(getMaintenanceInsight(withCommit("a", 1), withCommit("b", 20), NOW)?.winner).toBe("tie")
     })
- 
-    it("returns 'a' when only a has github data", () => {
-      const a = makePkg({ name: "a", github: makeGithub({ issues: 3 }) })
-      const b = makePkg({ name: "b" })
-      expect(getMaintenanceInsight(a, b)?.winner).toBe("a")
+
+    it("returns the side that has data when the other has none", () => {
+      expect(getMaintenanceInsight(withCommit("a", 5), makePkg({ name: "b" }), NOW)?.winner).toBe("a")
+      expect(getMaintenanceInsight(makePkg({ name: "a" }), withCommit("b", 5), NOW)?.winner).toBe("b")
     })
- 
-    it("returns 'b' when only b has github data", () => {
-      const a = makePkg({ name: "a" })
-      const b = makePkg({ name: "b", github: makeGithub({ issues: 3 }) })
-      expect(getMaintenanceInsight(a, b)?.winner).toBe("b")
+
+    it("falls back to the publish date without github data", () => {
+      const a = makePkg({ name: "a", publishedAt: daysAgo(3) })
+      const b = makePkg({ name: "b", publishedAt: daysAgo(300) })
+      expect(getMaintenanceInsight(a, b, NOW)?.winner).toBe("a")
     })
- 
-    it("returns 'a' when a has 0 issues and b has some", () => {
-      // 0 issues is valid and should win — uses == null check, not falsy
-      const a = makePkg({ name: "a", github: makeGithub({ issues: 0 }) })
-      const b = makePkg({ name: "b", github: makeGithub({ issues: 10 }) })
-      expect(getMaintenanceInsight(a, b)?.winner).toBe("a")
+
+    it("ignores open issue counts", () => {
+      const a = makePkg({ name: "a", github: { ...makeGithub({ issues: 900 }), lastCommit: daysAgo(1) } })
+      const b = makePkg({ name: "b", github: { ...makeGithub({ issues: 1 }), lastCommit: daysAgo(365) } })
+      expect(getMaintenanceInsight(a, b, NOW)?.winner).toBe("a")
     })
   })
- 
+
   describe("reason", () => {
-    it("includes both issue counts in the reason", () => {
-      const a = makePkg({ name: "a", github: makeGithub({ issues: 5 }) })
-      const b = makePkg({ name: "b", github: makeGithub({ issues: 30 }) })
-      const reason = getMaintenanceInsight(a, b)?.reason
-      expect(reason).toContain("5")
-      expect(reason).toContain("30")
+    it("mentions the winner and both relative dates", () => {
+      expect(getMaintenanceInsight(withCommit("react", 2), withCommit("preact", 90), NOW)?.reason).toBe(
+        "react was updated more recently (2 days ago vs 3 months ago)"
+      )
     })
- 
-    it("mentions the winner package name in the reason", () => {
-      const a = makePkg({ name: "react", github: makeGithub({ issues: 5 }) })
-      const b = makePkg({ name: "preact", github: makeGithub({ issues: 50 }) })
-      expect(getMaintenanceInsight(a, b)?.reason).toContain("react")
+
+    it("only mentions the winner date when the other side has no data", () => {
+      expect(getMaintenanceInsight(withCommit("react", 1), makePkg({ name: "b" }), NOW)?.reason).toBe(
+        "react was last updated yesterday"
+      )
     })
- 
-    it("returns the tie message when issues are equal", () => {
-      const a = makePkg({ name: "a", github: makeGithub({ issues: 10 }) })
-      const b = makePkg({ name: "b", github: makeGithub({ issues: 10 }) })
-      expect(getMaintenanceInsight(a, b)?.reason).toBe(
-        "Both projects have a similar number of open issues"
+
+    it("returns the tie message", () => {
+      expect(getMaintenanceInsight(withCommit("a", 1), withCommit("b", 2), NOW)?.reason).toBe(
+        "Both projects have been updated recently"
       )
     })
   })
- 
+
   describe("metadata", () => {
-    it("returns category 'Maintenance'", () => {
-      const a = makePkg({ name: "a", github: makeGithub({ issues: 1 }) })
-      const b = makePkg({ name: "b", github: makeGithub({ issues: 2 }) })
-      expect(getMaintenanceInsight(a, b)?.category).toBe("Maintenance")
+    it("returns category 'Maintenance' and weight 1", () => {
+      const insight = getMaintenanceInsight(withCommit("a", 1), withCommit("b", 100), NOW)
+      expect(insight?.category).toBe("Maintenance")
+      expect(insight?.weight).toBe(1)
     })
- 
-    it("returns weight 1", () => {
-      const a = makePkg({ name: "a", github: makeGithub({ stars: 1 }) })
-      const b = makePkg({ name: "b", github: makeGithub({ stars: 2 }) })
-      expect(getMaintenanceInsight(a, b)?.weight).toBe(1)
-    })
+  })
+})
+
+describe("formatTimeAgo", () => {
+  it.each([
+    [0, "today"],
+    [1, "yesterday"],
+    [12, "12 days ago"],
+    [45, "1 month ago"],
+    [200, "6 months ago"],
+    [400, "1 year ago"],
+    [1000, "2 years ago"],
+  ])("formats %i days as %s", (days, expected) => {
+    expect(formatTimeAgo(new Date(daysAgo(days)).getTime(), NOW)).toBe(expected)
   })
 })
 

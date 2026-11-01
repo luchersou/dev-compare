@@ -9,7 +9,7 @@ export function getDownloadsInsight(pkgA: PackageDetails, pkgB: PackageDetails):
 
   const winner: VerdictSide = !a ? "b" : !b ? "a" : a > b ? "a" : a < b ? "b" : "tie"
   const ratio = a && b ? Math.max(a, b) / Math.min(a, b) : null
-  const ratioText = ratio ? ` — ${ratio.toFixed(0)}x more popular` : ""
+  const ratioText = ratio && ratio > 1.5 ? ` — ${ratio.toFixed(1)}x more popular` : ""
 
   return {
     category: "Popularity",
@@ -62,23 +62,62 @@ export function getBundleInsight(pkgA: PackageDetails, pkgB: PackageDetails): In
   }
 }
 
-export function getMaintenanceInsight(pkgA: PackageDetails, pkgB: PackageDetails): Insight | null {
-  const a = pkgA.github?.issues
-  const b = pkgB.github?.issues
+const DAY_MS = 24 * 60 * 60 * 1000
+// Two projects touched within the same month count as equally active.
+const MAINTENANCE_TIE_DAYS = 30
+
+function lastActivity(pkg: PackageDetails): number | null {
+  const date = pkg.github?.lastCommit ?? pkg.publishedAt
+  if (!date) return null
+  const time = new Date(date).getTime()
+  return Number.isNaN(time) ? null : time
+}
+
+export function formatTimeAgo(time: number, now: number): string {
+  const days = Math.max(0, Math.floor((now - time) / DAY_MS))
+  if (days === 0) return "today"
+  if (days === 1) return "yesterday"
+  if (days < 30) return `${days} days ago`
+  const months = Math.floor(days / 30)
+  if (months < 12) return months === 1 ? "1 month ago" : `${months} months ago`
+  const years = Math.floor(days / 365)
+  return years <= 1 ? "1 year ago" : `${years} years ago`
+}
+
+// Open issue counts grow with popularity (and include PRs on GitHub), so
+// recent activity is a fairer maintenance signal.
+export function getMaintenanceInsight(
+  pkgA: PackageDetails,
+  pkgB: PackageDetails,
+  now: number = Date.now()
+): Insight | null {
+  const a = lastActivity(pkgA)
+  const b = lastActivity(pkgB)
   if (a == null && b == null) return null
 
   const winner: VerdictSide =
-    a == null ? "b" : b == null ? "a" : a < b ? "a" : a > b ? "b" : "tie"
-  const winnerIssues = winner === "a" ? a : b
-  const loserIssues = winner === "a" ? b : a
+    a == null ? "b"
+    : b == null ? "a"
+    : Math.abs(a - b) < MAINTENANCE_TIE_DAYS * DAY_MS ? "tie"
+    : a > b ? "a" : "b"
+
+  const winnerName = winner === "a" ? pkgA.name : pkgB.name
+  const winnerTime = winner === "a" ? a : b
+  const loserTime = winner === "a" ? b : a
+
+  let reason: string
+  if (winner === "tie") {
+    reason = "Both projects have been updated recently"
+  } else if (loserTime == null) {
+    reason = `${winnerName} was last updated ${formatTimeAgo(winnerTime!, now)}`
+  } else {
+    reason = `${winnerName} was updated more recently (${formatTimeAgo(winnerTime!, now)} vs ${formatTimeAgo(loserTime, now)})`
+  }
 
   return {
     category: "Maintenance",
     winner,
-    reason:
-      winner === "tie"
-        ? "Both projects have a similar number of open issues"
-        : `${winner === "a" ? pkgA.name : pkgB.name} has fewer open issues (${winnerIssues} vs ${loserIssues})`,
+    reason,
     weight: 1,
   }
 }
