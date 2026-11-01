@@ -1,8 +1,10 @@
+import { notFound } from "next/navigation"
+
 import { extractGithubRepo } from "@/lib/github"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchDownloads } from "@/services/api/downloads"
 import { fetchGithubRepo } from "@/services/api/github"
-import { fetchNpmPackage } from "@/services/api/npm"
+import { fetchNpmPackage, PackageNotFoundError } from "@/services/api/npm"
 import { PackageDetails } from "@/types/global"
 
 export async function getPackageDetails(name: string): Promise<PackageDetails> {
@@ -55,5 +57,15 @@ export async function getPackageDetails(name: string): Promise<PackageDetails> {
           contributors: undefined,
         }
       : undefined,
+  }
+}
+// Unknown packages render the not-found page; any other failure bubbles up
+// to the nearest error boundary.
+export async function getPackageDetailsOrNotFound(name: string): Promise<PackageDetails> {
+  try {
+    return await getPackageDetails(name)
+  } catch (error) {
+    if (error instanceof PackageNotFoundError) notFound()
+    throw error
   }
 }

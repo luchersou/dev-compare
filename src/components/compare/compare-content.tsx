@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { CompareHeader } from "@/components/compare/compare-header"
 import { CompareStatsTable } from "@/components/compare/compare-stats-table"
 import { CompareVerdict } from "@/components/compare/compare-verdict"
-import { getPackageDetails } from "@/services/queries/package-details"
+import { getPackageDetailsOrNotFound } from "@/services/queries/package-details"
 
 import { CompareFadeSection } from "./compare-fade-section"
 
@@ -16,8 +16,8 @@ export async function CompareContent({ searchParams }: CompareContentProps) {
   if (!a || !b) notFound()
 
   const [pkgA, pkgB] = await Promise.all([
-    getPackageDetails(a),
-    getPackageDetails(b),
+    getPackageDetailsOrNotFound(a),
+    getPackageDetailsOrNotFound(b),
   ])
 
   return (
