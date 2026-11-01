@@ -1,5 +1,7 @@
 # DevCompare
 
+![CI](https://github.com/luchersou/npm-comparator/actions/workflows/ci.yml/badge.svg)
+
 DevCompare is a developer tool for comparing npm packages side by side.
 Search any package to explore its weekly downloads, bundle size, GitHub activity and metadata — or pick two packages and get a full head-to-head breakdown with a verdict to help you decide.
 
@@ -24,12 +26,14 @@ Search any package to explore its weekly downloads, bundle size, GitHub activity
 ## Features
 
 - 🔍 **Package search** — real-time npm search with debounced input
-- 📦 **Package page** — version, description, bundle size, weekly downloads and GitHub stats
-- ⚖️ **Side-by-side comparison** — compare two packages with a visual stats table and a verdict
-- 📈 **Download chart** — historical download trends powered by Recharts
+- 📦 **Package page** — version, description, bundle size, downloads, GitHub stats and metadata, including scoped packages like `@types/node`
+- ⚖️ **Side-by-side comparison** — compare two packages with a visual stats table and a weighted verdict (popularity, community, bundle size and maintenance activity)
+- 📈 **Download history** — weekly downloads over the last 12 months, powered by Recharts
+- 💾 **Persistent selection** — the packages picked for comparison survive a reload
+- 🔗 **Shareable links** — dynamic Open Graph images for every package and comparison, plus sitemap and robots.txt
 - 🌗 **Light / Dark mode** — theme toggle with shadcn + Tailwind
 - 📱 **Responsive** — mobile-first layout throughout
-- ⚡ **Server Components by default** — client components only where interaction is required (search bar)
+- ⚡ **Server Components by default** — data is fetched and cached on the server; client components only where interaction is required
 
 ---
 
@@ -39,10 +43,12 @@ DevCompare aggregates data from four public APIs — no API key required:
 
 | API | Usage |
 |-----|-------|
-| `registry.npmjs.org` | Package metadata, version, description |
-| `api.npmjs.org` | Weekly download counts and historical data |
+| `registry.npmjs.org` | Latest version manifest and search (publish date) |
+| `api.npmjs.org` | Daily downloads for the last year (totals and chart) |
 | `bundlephobia.com/api` | Bundle size (minified + gzip) |
-| `api.github.com` | Stars, open issues, license |
+| `api.github.com` | Stars, forks, open issues and last push |
+
+Responses are cached for an hour with the Next.js data cache. Optional sources (downloads, bundle size, GitHub) time out after 8s, so a slow API shows up as missing data instead of blocking the page.
 
 ---
 
@@ -55,121 +61,30 @@ DevCompare aggregates data from four public APIs — no API key required:
 ---
 
 ## Project Structure
+
 ```
 src/
-├── app/
-│   ├── compare/
-│   │   └── page.tsx
-│   │
-│   ├── package/
-│   │   └── [name]/
-│   │       └── page.tsx
-│   ├── api/
-│   │   └── search/
-│   │       └── route.ts
-│   │
-│   ├── icon.tsx
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── global.css
-│
+├── app/                  # routes (App Router)
+│   ├── api/search/       # npm search proxy used by the search dialog
+│   ├── api/og/           # Open Graph images for packages and comparisons
+│   ├── compare/          # /compare?a=<pkg>&b=<pkg>
+│   ├── package/[...name] # /package/<name>, catch-all so scoped names work
+│   ├── sitemap.ts, robots.ts, opengraph-image.tsx, icon.tsx
+│   └── error.tsx, not-found.tsx
 ├── components/
-│   ├── ui/                # shadcn 
-│   │
-│   ├── layout/
-│   │   ├── section.tsx
-│   │   ├── header.tsx
-│   │   ├── hero.tsx
-│   │   ├── footer.tsx
-│   │   └── container.tsx
-│   │
-│   ├── global/
-│   │   ├── scroll-to-top-on-navigate.tsx
-│   │   ├── scroll-to-top.tsx
-│   │   └── compare-floating-bar.tsx
-│   │
-│   ├── home/
-│   │   ├── popular-packages.tsx
-│   │   ├── popular-comparisons.tsx
-│   │   ├── comparison-card.tsx
-│   │   ├── how-it-works.tsx
-│   │   ├── popular-package-card.tsx
-│   │   └── comparison-card-skeleton.tsx
-│   │
-│   ├── search/
-│   │   ├── search-bar.tsx
-│   │   ├── search-command.tsx
-│   │   ├── search-item.tsx
-│   │   └── search-skeleton.tsx
-│   │
-│   ├── package/
-│   │   ├── package-hero.tsx
-│   │   ├── stats-grid.tsx
-│   │   ├── package-content-skeleton.tsx
-│   │   ├── package-content.tsx
-│   │   ├── package-metadata.tsx
-│   │   ├── bundle-details.tsx
-│   │   └── downloads-chart.tsx
-│   │
-│   ├── compare/
-│   │   ├── compare-header.tsx
-│   │   ├── compare-content-skeleton.tsx
-│   │   ├── compare-content.tsx
-│   │   ├── compare-fade-section.tsx
-│   │   ├── summary-card.tsx
-│   │   ├── compare-stats-table.tsx
-│   │   └── compare-verdict.tsx
-│   │
-│   │
-│   └── shared/
-│       ├── error-state.tsx
-│       └── icons.tsx
-│
-├── features/
-│   └── search/
-│       ├── use-search.ts
-│       └── search.service.ts
-│
-├── store/
-│   └── compare.store.ts/
-│
+│   ├── ui/               # shadcn/ui primitives
+│   ├── layout/           # header, footer, container, section
+│   ├── home/ package/ compare/ search/   # page-specific components
+│   ├── global/           # floating compare bar, scroll helpers
+│   ├── og/               # Open Graph card layout
+│   └── shared/           # error and status states, icons
 ├── services/
-│   ├── api/
-│   │   ├── npm.ts
-│   │   ├── downloads.ts
-│   │   ├── bundlephobia.ts
-│   │   └── github.ts
-│   │
-│   └── query/
-│       ├── package-summary.ts
-│       ├── package-details.ts
-│       └── popular-comparison.ts
-│
-├── lib/
-│   ├── github.ts
-│   ├── verdict.ts
-│   └── utils.ts
-│
-├── hooks/
-│   ├── use-debounce.ts
-│   └── use-media-query.ts
-│
-├── providers/
-│   ├── query-provider.tsx
-│   └── theme-provider.tsx
-│
-├── types/
-│   ├── npm.ts
-│   ├── downloads.ts
-│   ├── compare.ts
-│   ├── verdict.ts
-│   ├── github.ts
-│   ├── bundlephobia.ts
-│   └── global.ts
-│
-└── config/
-    ├── popular-comparison.ts
-    └── popular-packages.ts
+│   ├── api/              # one module per external API
+│   └── queries/          # combine the APIs into page data
+├── lib/                  # pure helpers: verdict, routes, github urls, formatting
+├── features/search/      # search hook and client service
+├── store/                # zustand store for the compare selection
+├── hooks/ providers/ types/ config/
 ```
 
 ---
@@ -180,11 +95,33 @@ src/
 # Install dependencies
 npm install
 
+# (optional) configure environment variables
+cp .env.example .env.local
+
 # Run development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_TOKEN` | No | GitHub token (no scopes needed). Raises the GitHub API limit from 60 to 5000 requests/hour — recommended in production. |
+| `NEXT_PUBLIC_SITE_URL` | No | Public URL used for canonical links, Open Graph images and the sitemap. Defaults to the live demo. |
+
+### Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the development server |
+| `npm run build` / `npm start` | Production build and server |
+| `npm run lint` | ESLint (`lint:fix` to auto-fix) |
+| `npm run typecheck` | TypeScript without emitting |
+| `npm test` | Jest test suite (`test:watch` for watch mode) |
+
+Lint, typecheck and tests run on every push and pull request via GitHub Actions.
 
 ---
 
