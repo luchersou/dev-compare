@@ -1,3 +1,5 @@
+import "../../styles/package.css"
+
 import { Suspense } from "react"
 
 import { PackageContent } from "@/components/package/package-content"
@@ -11,7 +13,7 @@ interface PackagePageProps {
 
 export default function PackagePage({ params }: PackagePageProps) {
   return (
-    <main>
+    <main id="main" className="pkg-page">
       <Suspense fallback={<PackageContentSkeleton />}>
         <PackageContent params={params} />
       </Suspense>

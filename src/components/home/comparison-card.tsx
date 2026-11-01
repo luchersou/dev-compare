@@ -27,7 +27,7 @@ function DownloadBar({
         <span className="text-muted-foreground font-mono text-[10px] w-16 truncate">{nameA}</span>
         <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
           <div
-            className="h-full bg-foreground/70 rounded-full transition-all duration-500"
+            className="h-full bg-foreground/70 rounded-full"
             style={{ width: `${pctA}%` }}
           />
         </div>
@@ -37,7 +37,7 @@ function DownloadBar({
         <span className="text-muted-foreground font-mono text-[10px] w-16 truncate">{nameB}</span>
         <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
           <div
-            className="h-full bg-foreground/40 rounded-full transition-all duration-500"
+            className="h-full bg-foreground/40 rounded-full"
             style={{ width: `${100 - pctA}%` }}
           />
         </div>

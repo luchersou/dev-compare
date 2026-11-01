@@ -34,51 +34,28 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent
-        className="
-          p-0
-          !max-w-3xl
-          w-full
-          top-[15%] translate-y-0
-          bg-background/70 backdrop-blur-2xl
-          border border-border
-          shadow-2xl
-        "
-      >
-        <Command shouldFilter={false} className="w-full">
-
-          {/* 🔹 INPUT */}
+      <DialogContent className="search-dialog cut" showCloseButton={false}>
+        <Command shouldFilter={false} className="search-dialog__command">
           <CommandInput
-            className="h-14 text-base"
+            className="search-dialog__input"
             placeholder="Search npm packages..."
             value={query}
             onValueChange={setQuery}
           />
 
-          {/* 🔹 HINT */}
-          <div className="flex items-center justify-between px-4 py-2 text-xs text-muted-foreground border-b border-border">
-            <span className="flex items-center gap-2">
-              <kbd className="px-2 py-0.5 border rounded">Enter</kbd>
-              open package
-            </span>
+          <p className="search-dialog__hint">
+            <span><kbd className="kbd">Enter</kbd> open package</span>
+            <span><kbd className="kbd">+</kbd> add to compare</span>
+            <span><kbd className="kbd">Esc</kbd> close</span>
+          </p>
 
-            <span className="flex items-center gap-2">
-              <kbd className="px-2 py-0.5 border rounded">Esc</kbd>
-              close
-            </span>
-          </div>
-
-          {/* 🔹 RESULTS */}
-          <CommandList className="max-h-[400px] overflow-y-auto">
-
-            {/* empty state */}
+          <CommandList className="search-dialog__list">
             {isEmpty && (
-              <div className="p-6 text-sm text-muted-foreground text-center">
+              <p className="search-dialog__empty">
                 Start typing to search for packages
-              </div>
+              </p>
             )}
 
-            {/* error */}
             {!isEmpty && isError && (
               <ErrorState
                 message={error?.message || "Failed to fetch results"}
@@ -86,15 +63,12 @@ export function SearchCommand({ open, setOpen }: SearchCommandProps) {
               />
             )}
 
-            {/* loading */}
             {!isEmpty && isLoading && <SearchSkeleton />}
 
-            {/* empty */}
             {!isEmpty && !isLoading && !isError && data?.length === 0 && (
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty className="search-dialog__empty">No results found.</CommandEmpty>
             )}
 
-            {/* results */}
             {!isEmpty && !isLoading && !isError &&
               data?.map((pkg) => (
                 <SearchItem

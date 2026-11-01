@@ -1,110 +1,65 @@
-import {
-  CircleDot,
-  Download,
-  FileCode,
-  GitFork,
-  Star,
-  Zap,
-} from "lucide-react"
-
-import { Card, CardContent } from "@/components/ui/card"
+import { Container } from "@/components/layout/container"
 import { formatDownloads, formatSize, formatStars } from "@/lib/utils"
 import type { PackageDetails } from "@/types/global"
-
-import { Container } from "../layout/container"
-import { Section } from "../layout/section"
 
 interface StatsGridProps {
   pkg: PackageDetails
 }
 
-interface StatCardProps {
-  icon: React.ReactNode
+interface Stat {
   label: string
   value: string
-  description?: string
+  note?: string
 }
 
-function StatCard({ icon, label, value, description }: StatCardProps) {
+function StatGroup({ title, stats }: { title: string; stats: Stat[] }) {
   return (
-    <Card>
-      <CardContent className="p-4 md:p-5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-col gap-1 min-w-0">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              {label}
-            </span>
-            <span className="text-2xl font-bold font-mono tracking-tight">
-              {value}
-            </span>
-            {description && (
-              <span className="text-xs text-muted-foreground">{description}</span>
-            )}
+    <div className="stat-group">
+      <h3 className="stat-group__title">{title}</h3>
+      <dl className="stat-group__list">
+        {stats.map((stat) => (
+          <div key={stat.label} className="stat">
+            <dt>{stat.label}</dt>
+            <dd className="num">{stat.value}</dd>
+            {stat.note && <dd className="stat__note">{stat.note}</dd>}
           </div>
-          <div className="text-muted-foreground mt-0.5 shrink-0">{icon}</div>
-        </div>
-      </CardContent>
-    </Card>
+        ))}
+      </dl>
+    </div>
   )
 }
 
 export function StatsGrid({ pkg }: StatsGridProps) {
-  const stats = [
-    {
-      icon: <Download className="size-4" />,
-      label: "Weekly downloads",
-      value: formatDownloads(pkg.downloads?.weekly ?? null),
-    },
-    {
-      icon: <Download className="size-4" />,
-      label: "Monthly downloads",
-      value: formatDownloads(pkg.downloads?.monthly ?? null),
-    },
-    {
-      icon: <Download className="size-4" />,
-      label: "Yearly downloads",
-      value: formatDownloads(pkg.downloads?.yearly ?? null),
-    },
-    {
-      icon: <FileCode className="size-4" />,
-      label: "Bundle size",
-      value: formatSize(pkg.bundle?.size ?? null),
-      description: pkg.bundle ? `${formatSize(pkg.bundle.gzip)} gzipped` : undefined,
-    },
-    {
-      icon: <Star className="size-4" />,
-      label: "GitHub stars",
-      value: pkg.github?.stars != null ? formatStars(pkg.github.stars) : "—",
-    },
-    {
-      icon: <GitFork className="size-4" />,
-      label: "Forks",
-      value: formatDownloads(pkg.github?.forks ?? null),
-    },
-    {
-      icon: <CircleDot className="size-4" />,
-      label: "Open issues",
-      value: formatDownloads(pkg.github?.issues ?? null),
-    },
-    {
-      icon: <Zap className="size-4" />,
-      label: "Gzip size",
-      value: formatSize(pkg.bundle?.gzip ?? null),
-    },
-  ]
-
   return (
-    <Section>
+    <section className="pkg-section" aria-labelledby="stats-title">
       <Container>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
-          Stats
-        </h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <StatCard key={stat.label} {...stat} />
-          ))}
+        <h2 id="stats-title" className="pkg-section__title">Stats</h2>
+        <div className="stats-board">
+          <StatGroup
+            title="Downloads"
+            stats={[
+              { label: "Weekly downloads", value: formatDownloads(pkg.downloads?.weekly ?? null) },
+              { label: "Monthly downloads", value: formatDownloads(pkg.downloads?.monthly ?? null) },
+              { label: "Yearly downloads", value: formatDownloads(pkg.downloads?.yearly ?? null) },
+            ]}
+          />
+          <StatGroup
+            title="GitHub"
+            stats={[
+              { label: "GitHub stars", value: pkg.github?.stars != null ? formatStars(pkg.github.stars) : "—" },
+              { label: "Forks", value: formatDownloads(pkg.github?.forks ?? null) },
+              { label: "Open issues", value: formatDownloads(pkg.github?.issues ?? null) },
+            ]}
+          />
+          <StatGroup
+            title="Bundle"
+            stats={[
+              { label: "Bundle size", value: formatSize(pkg.bundle?.size ?? null), note: "minified" },
+              { label: "Gzip size", value: formatSize(pkg.bundle?.gzip ?? null) },
+            ]}
+          />
         </div>
       </Container>
-    </Section>
+    </section>
   )
 }

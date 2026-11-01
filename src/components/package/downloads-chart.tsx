@@ -2,13 +2,7 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Container } from "@/components/layout/container"
 import {
   ChartConfig,
   ChartContainer,
@@ -47,23 +41,22 @@ export function DownloadsChart({ pkg }: DownloadsChartProps) {
   if (!history || history.length < 2) return null
 
   return (
-    <section className="px-4 py-6 md:px-6 md:py-8">
-      <div className="mx-auto max-w-5xl">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Weekly downloads</CardTitle>
-            <CardDescription>Downloads per week over the last 12 months</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig} className="h-[200px] w-full md:h-[260px]">
+    <section className="pkg-section" aria-labelledby="chart-title">
+      <Container>
+        <div className="pkg-section__head">
+          <h2 id="chart-title" className="pkg-section__title">Weekly downloads</h2>
+          <p className="muted">Downloads per week over the last 12 months</p>
+        </div>
+        <figure className="chart-frame">
+            <ChartContainer config={chartConfig} className="chart-frame__plot">
               <AreaChart data={history} accessibilityLayer margin={{ left: 0, right: 8 }}>
                 <defs>
                   <linearGradient id="downloadsFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-downloads)" stopOpacity={0.25} />
+                    <stop offset="0%" stopColor="var(--color-downloads)" style={{ stopOpacity: "var(--chart-fill-top)" }} />
                     <stop offset="100%" stopColor="var(--color-downloads)" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid vertical={false} strokeDasharray="1 1" />
+                <CartesianGrid vertical={false} stroke="var(--color-rule)" />
                 <XAxis
                   dataKey="week"
                   tickLine={false}
@@ -71,14 +64,14 @@ export function DownloadsChart({ pkg }: DownloadsChartProps) {
                   tickMargin={8}
                   minTickGap={32}
                   tickFormatter={formatMonth}
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 13, fill: "var(--color-muted)" }}
                 />
                 <YAxis
                   tickFormatter={formatDownloads}
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fontSize: 12 }}
-                  width={48}
+                  tick={{ fontSize: 13, fill: "var(--color-muted)" }}
+                  width={64}
                 />
                 <ChartTooltip
                   cursor={{ stroke: "var(--border)", strokeWidth: 1 }}
@@ -99,9 +92,8 @@ export function DownloadsChart({ pkg }: DownloadsChartProps) {
                 />
               </AreaChart>
             </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
+        </figure>
+      </Container>
     </section>
   )
 }

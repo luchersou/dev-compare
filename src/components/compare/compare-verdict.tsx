@@ -1,32 +1,14 @@
+import { Container } from "@/components/layout/container"
 import {
-	Activity,
-	Download,
-  Minus,
-	Package,
-	Star,
-  Trophy,
-} from "lucide-react"
-
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { generateIconColor } from "@/lib/utils"
-import { 
-	computeVerdict,
-	getBundleInsight,
-	getCommunityInsight, 
-	getDownloadsInsight, 
-	getMaintenanceInsight,
-	verdictSummary,
+  computeVerdict,
+  getBundleInsight,
+  getCommunityInsight,
+  getDownloadsInsight,
+  getMaintenanceInsight,
+  verdictSummary,
 } from "@/lib/verdict"
 import { PackageDetails } from "@/types/global"
 import { Insight } from "@/types/verdict"
-
-const categoryIcons: Record<string, React.ReactNode> = {
-  Popularity: <Download size={14} />,
-  Community: <Star size={14} />,
-  "Bundle size": <Package size={14} />,
-  Maintenance: <Activity size={14} />,
-}
 
 interface CompareVerdictProps {
   pkgA: PackageDetails
@@ -42,40 +24,18 @@ function InsightRow({
   pkgA: PackageDetails
   pkgB: PackageDetails
 }) {
-  const colorA = generateIconColor(pkgA.name)
-  const colorB = generateIconColor(pkgB.name)
+  const winnerName =
+    insight.winner === "tie" ? "Tie" : insight.winner === "a" ? pkgA.name : pkgB.name
 
   return (
-    <div className="flex flex-col gap-2 py-4 border-b border-border last:border-0">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {categoryIcons[insight.category]}
-          <span className="font-medium">{insight.category}</span>
-        </div>
-
-        {insight.winner === "tie" ? (
-          <Badge variant="outline" className="text-xs gap-1">
-            <Minus size={10} />
-            Tie
-          </Badge>
-        ) : (
-          <Badge
-            variant="outline"
-            className="text-xs font-mono"
-            style={{
-              borderColor: insight.winner === "a" ? colorA : colorB,
-              color: insight.winner === "a" ? colorA : colorB,
-            }}
-          >
-            {insight.winner === "a" ? pkgA.name : pkgB.name}
-          </Badge>
-        )}
-      </div>
-
-      <p className="text-xs text-muted-foreground leading-relaxed">
-        {insight.reason}
-      </p>
-    </div>
+    <li className="verdict__row">
+      <span className="verdict__category">{insight.category}</span>
+      <span className={insight.winner === "tie" ? "verdict__winner" : "verdict__winner mono"}>
+        {winnerName}
+      </span>
+      <span className="verdict__weight num">weight {insight.weight}</span>
+      <p className="verdict__reason">{insight.reason}</p>
+    </li>
   )
 }
 
@@ -93,66 +53,31 @@ export function CompareVerdict({ pkgA, pkgB }: CompareVerdictProps) {
   const summary = verdictSummary(winner, pkgA, pkgB, scoreA, scoreB)
 
   const winnerPkg = winner === "a" ? pkgA : winner === "b" ? pkgB : null
-  const winnerColor = winnerPkg ? generateIconColor(winnerPkg.name) : undefined
 
   return (
-    <section className="px-4 py-6 md:px-6 md:py-8">
-      <div className="mx-auto max-w-5xl">
-        <Card className="shadow-sm overflow-hidden">
-          <CardHeader className="pb-0">
-            <div className="flex items-center gap-2">
-              <Trophy size={15} className="text-muted-foreground" />
-              <CardTitle className="text-base font-semibold">Verdict</CardTitle>
-            </div>
-          </CardHeader>
+    <section className="band band--graphite verdict" aria-labelledby="verdict-title">
+      <Container className="verdict__inner">
+        <div className="verdict__lead">
+          <h2 id="verdict-title" className="verdict__title">Verdict</h2>
+          <p className="verdict__overall">
+            <span className="verdict__label">Overall winner</span>
+            <span className={winnerPkg ? "verdict__name mono" : "verdict__name"}>
+              {winnerPkg ? winnerPkg.name : "Tie"}
+            </span>
+          </p>
+          <p className="verdict__score num" aria-label={`Score ${scoreA} to ${scoreB}`}>
+            <span>{pkgA.name} {scoreA}</span>
+            <span>{pkgB.name} {scoreB}</span>
+          </p>
+          <p className="verdict__summary">{summary}</p>
+        </div>
 
-          <CardContent className="flex flex-col gap-0 pt-4">
-
-            {/* Insights */}
-            <div className="mb-6">
-              {insights.map((insight) => (
-                <InsightRow
-                  key={insight.category}
-                  insight={insight}
-                  pkgA={pkgA}
-                  pkgB={pkgB}
-                />
-              ))}
-            </div>
-
-            {/* Final verdict */}
-            <div
-              className="rounded-lg p-4 flex flex-col gap-3"
-              style={{
-                backgroundColor: winnerColor
-                  ? `color-mix(in oklch, ${winnerColor} 8%, transparent)`
-                  : "var(--muted)",
-                borderLeft: `3px solid ${winnerColor ?? "var(--border)"}`,
-              }}
-            >
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Overall winner
-                </span>
-                {winner === "tie" ? (
-                  <Badge variant="secondary">Tie</Badge>
-                ) : (
-                  <Badge
-                    className="font-mono text-xs text-white"
-                    style={{ backgroundColor: winnerColor }}
-                  >
-                    {winnerPkg?.name}
-                  </Badge>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {summary}
-              </p>
-            </div>
-
-          </CardContent>
-        </Card>
-      </div>
+        <ol className="verdict__rows">
+          {insights.map((insight) => (
+            <InsightRow key={insight.category} insight={insight} pkgA={pkgA} pkgB={pkgB} />
+          ))}
+        </ol>
+      </Container>
     </section>
   )
 }

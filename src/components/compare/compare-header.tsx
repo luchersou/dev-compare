@@ -1,9 +1,7 @@
-import { ExternalLink,GitCompareArrows } from "lucide-react"
 import Link from "next/link"
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { generateIconColor } from "@/lib/utils"
+import { Container } from "@/components/layout/container"
+import { packageHref } from "@/lib/routes"
 import { PackageDetails } from "@/types/global"
 
 interface CompareHeaderProps {
@@ -11,83 +9,59 @@ interface CompareHeaderProps {
   pkgB: PackageDetails
 }
 
-function PackageIdentity({ pkg }: { pkg: PackageDetails }) {
-  const color = generateIconColor(pkg.name)
-  const initials = pkg.name.replace(/^@[^/]+\//, "").slice(0, 2).toUpperCase()
-
+function PackageIdentity({ pkg, side }: { pkg: PackageDetails; side: "a" | "b" }) {
   return (
-    <div className="flex flex-col items-center gap-3 text-center flex-1">
-      <div
-        className="flex h-14 w-14 items-center justify-center rounded-xl text-sm font-bold text-white shadow-md"
-        style={{ backgroundColor: color }}
-      >
-        {initials}
-      </div>
+    <div className={`cmp-id cmp-id--${side}`}>
+      <p className="cmp-id__name">
+        <Link href={packageHref(pkg.name)} className="link mono">{pkg.name}</Link>
+        <span className="cmp-id__version mono">v{pkg.version}</span>
+      </p>
 
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-center gap-2 flex-wrap">
-          <span className="font-mono text-lg font-semibold">{pkg.name}</span>
-          <Badge variant="secondary" className="text-xs font-mono">
-            v{pkg.version}
-          </Badge>
-        </div>
+      {pkg.description && <p className="cmp-id__desc">{pkg.description}</p>}
 
-        {pkg.description && (
-          <p className="text-sm text-muted-foreground max-w-[280px] line-clamp-2">
-            {pkg.description}
-          </p>
-        )}
-
-        <div className="flex items-center justify-center gap-2 mt-1">
+      {(pkg.repository || pkg.homepage) && (
+        <ul className="cmp-id__links">
           {pkg.repository && (
-            <Button size="sm" variant="ghost" className="h-7 gap-1.5 text-xs" asChild>
-              <Link href={pkg.repository} target="_blank" rel="noopener noreferrer">
-                <ExternalLink size={12} />
+            <li>
+              <a href={pkg.repository} target="_blank" rel="noopener noreferrer" className="link">
                 Repository
-              </Link>
-            </Button>
+              </a>
+            </li>
           )}
           {pkg.homepage && (
-            <Button size="sm" variant="ghost" className="h-7 gap-1.5 text-xs" asChild>
-              <Link href={pkg.homepage} target="_blank" rel="noopener noreferrer">
-                <ExternalLink size={12} />
+            <li>
+              <a href={pkg.homepage} target="_blank" rel="noopener noreferrer" className="link">
                 Homepage
-              </Link>
-            </Button>
+              </a>
+            </li>
           )}
-        </div>
-      </div>
+        </ul>
+      )}
     </div>
   )
 }
 
 export function CompareHeader({ pkgA, pkgB }: CompareHeaderProps) {
   return (
-    <section className="px-4 py-10 md:px-6 md:py-14">
-      <div className="mx-auto max-w-5xl flex flex-col gap-8">
+    <section className="cmp-hero page-top" aria-labelledby="cmp-title">
+      <Container className="cmp-hero__inner">
+        <nav className="crumbs" aria-label="Breadcrumb">
+          <Link href="/" className="link">Home</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Comparing packages</span>
+        </nav>
 
-        {/* Label */}
-        <div className="flex items-center justify-center gap-2">
-          <GitCompareArrows size={16} className="text-muted-foreground" />
-          <span className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
-            Comparing packages
-          </span>
+        <h1 id="cmp-title" className="cmp-hero__title">
+          <span>{pkgA.name}</span>
+          <span>vs</span>
+          <span>{pkgB.name}</span>
+        </h1>
+
+        <div className="cmp-hero__ids">
+          <PackageIdentity pkg={pkgA} side="a" />
+          <PackageIdentity pkg={pkgB} side="b" />
         </div>
-
-        {/* Packages */}
-        <div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:justify-center">
-          <PackageIdentity pkg={pkgA} />
-
-          <div className="flex items-center justify-center md:mt-6">
-            <span className="font-mono text-sm font-medium text-muted-foreground px-2">
-              vs
-            </span>
-          </div>
-
-          <PackageIdentity pkg={pkgB} />
-        </div>
-
-      </div>
+      </Container>
     </section>
   )
 }

@@ -9,7 +9,7 @@ export function getDownloadsInsight(pkgA: PackageDetails, pkgB: PackageDetails):
 
   const winner: VerdictSide = !a ? "b" : !b ? "a" : a > b ? "a" : a < b ? "b" : "tie"
   const ratio = a && b ? Math.max(a, b) / Math.min(a, b) : null
-  const ratioText = ratio && ratio > 1.5 ? ` — ${ratio.toFixed(1)}x more popular` : ""
+  const ratioText = ratio && ratio > 1.5 ? `, ${ratio.toFixed(1)}x more popular` : ""
 
   return {
     category: "Popularity",
@@ -49,7 +49,7 @@ export function getBundleInsight(pkgA: PackageDetails, pkgB: PackageDetails): In
 
   const winner: VerdictSide = !a ? "b" : !b ? "a" : a < b ? "a" : a > b ? "b" : "tie"
   const ratio = a && b ? Math.max(a, b) / Math.min(a, b) : null
-  const ratioText = ratio && ratio > 1.5 ? ` — ${ratio.toFixed(1)}x lighter` : ""
+  const ratioText = ratio && ratio > 1.5 ? `, ${ratio.toFixed(1)}x lighter` : ""
 
   return {
     category: "Bundle size",
@@ -155,7 +155,7 @@ export function verdictSummary(
   const loserScore = winner === "a" ? scoreB : scoreA
 
   if (winnerScore >= loserScore * 2) {
-    return `${winnerPkg.name} is the clear choice — it leads across most categories and is the more established option for most use cases.`
+    return `${winnerPkg.name} is the clear choice: it leads across most categories and is the more established option for most use cases.`
   }
 
   return `${winnerPkg.name} has a slight edge over ${loserPkg.name}, but both are solid choices. Consider your priorities before deciding.`

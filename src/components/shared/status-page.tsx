@@ -9,12 +9,14 @@ interface StatusPageProps {
 
 export function StatusPage({ code, title, description, children }: StatusPageProps) {
   return (
-    <main className="relative flex flex-1 items-center py-24 md:py-32">
-      <Container className="flex flex-col items-center gap-4 text-center">
-        <span className="font-mono text-sm text-muted-foreground">{code}</span>
-        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">{title}</h1>
-        <p className="max-w-md text-muted-foreground">{description}</p>
-        {children && <div className="mt-4 flex items-center gap-3">{children}</div>}
+    <main id="main" className="status-page page-top">
+      <Container className="status-page__inner">
+        <p className="status-page__code mono" aria-hidden="true">{code}</p>
+        <div className="status-page__text">
+          <h1>{title}</h1>
+          <p className="lead">{description}</p>
+          {children && <div className="status-page__actions">{children}</div>}
+        </div>
       </Container>
     </main>
   )

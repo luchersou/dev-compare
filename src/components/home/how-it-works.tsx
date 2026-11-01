@@ -1,7 +1,4 @@
-"use client"
-
-import { Workflow } from "lucide-react"
-import { motion } from "motion/react"
+import Image from "next/image"
 
 import { Container } from "@/components/layout/container"
 import { Section } from "@/components/layout/section"
@@ -27,69 +24,58 @@ const STEPS = [
   },
 ]
 
+// Screens captured from the running app (light and dark), one per step.
+const SCREENS = [
+  { name: "search", caption: "The search dialog, opened with ⌘ K." },
+  { name: "package", caption: "A package page: figures, the weekly chart and the install command." },
+  { name: "compare", caption: "Two packages side by side, each leading value checked." },
+]
+
 export function HowItWorks() {
   return (
-    <Section>
-      <Container>
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.85, ease: "easeOut" }}
-          className="mb-16"
-        >
-          <div className="mb-4 flex items-center gap-2">
-            <Workflow className="h-4 w-4 text-primary" />
-            <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              How it works
-            </p>
-          </div>
-          <h2 className="max-w-sm text-[clamp(1.6rem,3vw,2.25rem)] font-medium leading-[1.15] tracking-tight text-foreground">
-            From search to decision in seconds
-          </h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Three steps to find the right package for your project
-          </p>
-        </motion.div>
-
-        {/* Steps grid */}
-        <div className="grid grid-cols-1 rounded-xl overflow-hidden border border-border sm:grid-cols-3 sm:divide-x divide-border">
-          {STEPS.map((step, i) => (
-            <motion.div
-              key={step.title}
-              className="group relative overflow-hidden bg-card px-8 py-10 transition-colors duration-200 hover:bg-muted/40"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.85, delay: i * 0.1, ease: "easeOut" }}
-            >
-              {/* Decorative backdrop number */}
-              <span className="pointer-events-none absolute -bottom-3 -right-2 select-none text-[7rem] font-semibold leading-none tracking-tighter text-foreground/[0.10] transition-all duration-300 group-hover:text-foreground/[0.18] group-hover:-bottom-1">
-                {i + 1}
-              </span>
-
-              {/* Content */}
-              <div className="relative z-10">
-                <p className="mb-3 text-[17px] font-medium leading-snug tracking-tight text-foreground">
-                  {step.title}
-                </p>
-                <p className="mb-6 text-[13px] leading-relaxed text-muted-foreground">
-                  {step.description}
-                </p>
-
-                <div className="flex flex-wrap gap-1.5">
+    <Section labelledBy="how-title" gap="large">
+      <Container className="stack">
+        <div className="stack__pane">
+          <h2 id="how-title">From search to decision in seconds</h2>
+          <ol className="steps">
+            {STEPS.map((step) => (
+              <li key={step.title}>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+                <ul className="steps__tags" aria-label="Data used">
                   {step.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-muted-foreground"
-                    >
-                      {tag}
-                    </span>
+                    <li key={tag}>{tag}</li>
                   ))}
-                </div>
+                </ul>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="stack__screens">
+          {SCREENS.map((screen, i) => (
+            <figure key={screen.name} className="screen">
+              <div className={screen.name === "search" ? "screen__frame screen__frame--fit cut" : "screen__frame cut"} data-kind="product">
+                <Image
+                  className="screen--light"
+                  src={`/images/screens/${screen.name}-light.webp`}
+                  alt=""
+                  width={1440}
+                  height={900}
+                  sizes="(max-width: 960px) 100vw, 760px"
+                  priority={i === 0}
+                />
+                <Image
+                  className="screen--dark"
+                  src={`/images/screens/${screen.name}-dark.webp`}
+                  alt=""
+                  width={1440}
+                  height={900}
+                  sizes="(max-width: 960px) 100vw, 760px"
+                />
               </div>
-            </motion.div>
+              <figcaption>{screen.caption}</figcaption>
+            </figure>
           ))}
         </div>
       </Container>

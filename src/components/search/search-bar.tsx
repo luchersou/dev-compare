@@ -1,37 +1,32 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useState } from "react";
 
-import { SearchCommand } from "./search-command";
+import { cn } from "@/lib/utils";
+import { useSearchStore } from "@/store/search.store";
 
-export function SearchBar() {
-  const [open, setOpen] = useState(false);
+interface SearchBarProps {
+  className?: string;
+}
+
+// The large search trigger used in the hero and the close; it opens the
+// global dialog.
+export function SearchBar({ className }: SearchBarProps) {
+  const setOpen = useSearchStore((s) => s.setOpen);
 
   return (
-    <>
-      <div
-        onClick={() => setOpen(true)}
-        className="
-          flex items-center gap-3 w-full max-w-xl mx-auto
-          px-4 py-3
-          bg-card border border-border
-          rounded-xl cursor-pointer
-          hover:bg-accent/50 transition
-        "
-      >
-        <Search className="w-5 h-5 text-muted-foreground" />
-
-        <span className="text-muted-foreground">
-          Search npm packages...
-        </span>
-
-        <kbd className="ml-auto text-xs text-muted-foreground">
-          ⌘K
-        </kbd>
-      </div>
-
-      <SearchCommand open={open} setOpen={setOpen} />
-    </>
+    <button
+      type="button"
+      onClick={() => setOpen(true)}
+      className={cn("search-key", className)}
+      aria-haspopup="dialog"
+    >
+      <Search aria-hidden="true" />
+      <span>Search npm packages…</span>
+      <span className="search-key__keys" aria-hidden="true">
+        <kbd className="kbd">⌘</kbd>
+        <kbd className="kbd">K</kbd>
+      </span>
+    </button>
   );
 }

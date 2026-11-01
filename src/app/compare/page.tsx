@@ -1,3 +1,5 @@
+import "../styles/compare.css"
+
 import { Suspense } from "react"
 
 import { CompareContent } from "@/components/compare/compare-content"
@@ -10,7 +12,7 @@ interface ComparePageProps {
 
 export default function ComparePage({ searchParams }: ComparePageProps) {
   return (
-    <main className="pt-12 md:pt-16">
+    <main id="main" className="cmp-page">
       <Suspense fallback={<CompareContentSkeleton />}>
         <CompareContent searchParams={searchParams} />
       </Suspense>

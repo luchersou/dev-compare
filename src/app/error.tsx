@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useEffect } from "react"
 
 import { StatusPage } from "@/components/shared/status-page"
-import { Button } from "@/components/ui/button"
 
 export default function ErrorPage({
   error,
@@ -21,12 +20,14 @@ export default function ErrorPage({
     <StatusPage
       code="500"
       title="Something went wrong"
-      description="One of the data sources failed to respond. This is usually temporary — try again in a moment."
+      description="One of the data sources failed to respond. This is usually temporary, so try again in a moment."
     >
-      <Button onClick={() => unstable_retry()}>Try again</Button>
-      <Button variant="outline" asChild>
-        <Link href="/">Back to home</Link>
-      </Button>
+      <button type="button" className="key key--primary" onClick={() => unstable_retry()}>
+        Try again
+      </button>
+      <Link href="/" className="key">
+        Back to home
+      </Link>
     </StatusPage>
   )
 }
