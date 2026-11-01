@@ -19,7 +19,7 @@ export async function getPackageSummary(name: string): Promise<PackageSummary> {
 
   return {
     name: npmData.name,
-    version: npmData["dist-tags"]?.latest,
+    version: npmData.version,
     description: npmData.description,
     weeklyDownloads: downloads.status === "fulfilled" ? downloads.value?.weekly : undefined,
     gzipSize: bundle.status === "fulfilled" ? bundle.value?.gzip : undefined,

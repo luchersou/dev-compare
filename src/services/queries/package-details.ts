@@ -4,15 +4,16 @@ import { extractGithubRepo } from "@/lib/github"
 import { fetchBundle } from "@/services/api/bundlephobia"
 import { fetchDownloads } from "@/services/api/downloads"
 import { fetchGithubRepo } from "@/services/api/github"
-import { fetchNpmPackage, PackageNotFoundError } from "@/services/api/npm"
+import { fetchNpmPackage, fetchPublishedAt, PackageNotFoundError } from "@/services/api/npm"
 import { PackageDetails } from "@/types/global"
 
 export async function getPackageDetails(name: string): Promise<PackageDetails> {
   const npmData = await fetchNpmPackage(name)
 
-  const [downloads, bundle] = await Promise.all([
+  const [downloads, bundle, publishedAt] = await Promise.all([
     fetchDownloads(name),
     fetchBundle(name),
+    fetchPublishedAt(name),
   ])
 
   const repoPath = extractGithubRepo(npmData.repository?.url)
@@ -21,23 +22,20 @@ export async function getPackageDetails(name: string): Promise<PackageDetails> {
     github = await fetchGithubRepo(repoPath)
   }
 
-  const latestVersion = npmData["dist-tags"]?.latest
-  const versionData = npmData.versions?.[latestVersion]
-
   return {
     name: npmData.name,
     description: npmData.description,
-    version: latestVersion,
+    version: npmData.version,
 
-    license: versionData?.license,
-    author: typeof versionData?.author === "string"
-      ? versionData.author
-      : versionData?.author?.name,
-    homepage: versionData?.homepage,
+    license: npmData.license,
+    author: typeof npmData.author === "string"
+      ? npmData.author
+      : npmData.author?.name,
+    homepage: npmData.homepage,
     repository: npmData.repository?.url?.replace(/^git\+/, "").replace(/\.git$/, ""),
-    keywords: versionData?.keywords,
-    dependencies: versionData?.dependencies,
-    publishedAt: npmData.time?.[latestVersion],
+    keywords: npmData.keywords,
+    dependencies: npmData.dependencies,
+    publishedAt,
 
     downloads: downloads
       ? { weekly: downloads.weekly, monthly: downloads.monthly, yearly: downloads.yearly }

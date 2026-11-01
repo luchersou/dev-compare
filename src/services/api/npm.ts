@@ -1,4 +1,4 @@
-import { NpmPackage } from "@/types/npm"
+import { NpmManifest } from "@/types/npm"
 
 const BASE_NPM = "https://registry.npmjs.org"
 
@@ -9,9 +9,9 @@ export class PackageNotFoundError extends Error {
   }
 }
 
-export async function fetchNpmPackage(name: string): Promise<NpmPackage> {
-  const res = await fetch(`${BASE_NPM}/${encodeURIComponent(name)}`, {
-    next: { revalidate: 60 * 60 * 24 }, // Revalidate every 24 hours
+export async function fetchNpmPackage(name: string): Promise<NpmManifest> {
+  const res = await fetch(`${BASE_NPM}/${encodeURIComponent(name)}/latest`, {
+    next: { revalidate: 60 * 60 }, // Revalidate every 1 hour
   })
 
   if (res.status === 404) {
@@ -23,4 +23,26 @@ export async function fetchNpmPackage(name: string): Promise<NpmPackage> {
   }
 
   return res.json()
+}
+
+interface NpmSearchResponse {
+  objects: { package: { name: string; date?: string } }[]
+}
+
+// The latest manifest has no publish date, but the search index does.
+export async function fetchPublishedAt(name: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(
+      `${BASE_NPM}/-/v1/search?text=${encodeURIComponent(name)}&size=5`,
+      { next: { revalidate: 60 * 60 } } // Revalidate every 1 hour
+    )
+
+    if (!res.ok) return undefined
+
+    const data = (await res.json()) as NpmSearchResponse
+    return data.objects.find((o) => o.package.name === name)?.package.date
+  } catch (error) {
+    console.error(`[npm] Error fetching publish date for ${name}`, error)
+    return undefined
+  }
 }
