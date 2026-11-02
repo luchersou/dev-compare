@@ -22,6 +22,17 @@
 .steps__tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin: var(--space-2xs) 0 0; padding: 0; list-style: none; }
 .steps__tags li { display: block; padding: var(--space-3xs) var(--space-xs); border: var(--rule-hair) solid var(--color-rule-2); border-top-width: var(--rule-hair); counter-increment: none; color: var(--color-ink-2); font-size: var(--text-sm); }
 .steps__tags li::before { content: none; }
+/* One step at a time beside the pinned pane: all three share one grid cell
+   and the one whose screen is in view shows; the others slide out in the
+   direction of the scroll. Without script or below 60rem it is a plain list. */
+@media (min-width: 60rem) {
+  html.js .steps > li { grid-area: 1 / 1; transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out); }
+  html.js .steps > li[data-state="before"] { opacity: 0; transform: translateY(-16px); pointer-events: none; }
+  html.js .steps > li[data-state="after"] { opacity: 0; transform: translateY(16px); pointer-events: none; }
+}
+@media (min-width: 60rem) and (prefers-reduced-motion: reduce) {
+  html.js .steps > li { transition: none; transform: none; }
+}
 .stack__screens { display: grid; gap: var(--space-2xl); }
 .screen { margin: 0; display: grid; gap: var(--space-sm); }
 .dark .screen__frame { border-color: var(--color-rule-2); background: var(--color-graphite-2); color: var(--color-graphite-ink); }
