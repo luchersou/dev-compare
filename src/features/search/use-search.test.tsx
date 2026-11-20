@@ -60,6 +60,28 @@ describe("useSearch", () => {
     expect(mockSearchPackages).toHaveBeenCalledWith("react")
   })
 
+  it("sends the trimmed query", async () => {
+    mockSearchPackages.mockResolvedValueOnce([])
+
+    const { result } = renderUseSearch("  react  ")
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(mockSearchPackages).toHaveBeenCalledWith("react")
+  })
+
+  it("shares one cache entry for queries that differ only by whitespace", async () => {
+    mockSearchPackages.mockResolvedValue([])
+
+    const { result, rerender } = renderUseSearch("react")
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    rerender({ q: "react " })
+    rerender({ q: " react" })
+
+    expect(result.current.isSuccess).toBe(true)
+    expect(mockSearchPackages).toHaveBeenCalledTimes(1)
+  })
+
   it("retries once, then exposes the error", async () => {
     mockSearchPackages.mockRejectedValue(new Error("Search failed: 500"))
 
