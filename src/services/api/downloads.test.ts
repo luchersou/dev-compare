@@ -1,6 +1,6 @@
 import type { DailyDownloads } from "@/types/downloads"
 
-import { groupByWeek, summarizeDownloads } from "./downloads"
+import { fetchDownloads, fetchDownloadsByPeriod, groupByWeek, summarizeDownloads } from "./downloads"
 
 function makeDays(count: number): DailyDownloads[] {
   return Array.from({ length: count }, (_, i) => ({
@@ -35,5 +35,69 @@ describe("groupByWeek", () => {
 
   it("returns an empty list when there is less than a week of data", () => {
     expect(groupByWeek(makeDays(6))).toEqual([])
+  })
+})
+
+describe("fetchDownloadsByPeriod", () => {
+  beforeEach(() => {
+    jest.spyOn(console, "warn").mockImplementation(() => {})
+    jest.spyOn(console, "error").mockImplementation(() => {})
+  })
+  afterEach(() => jest.restoreAllMocks())
+
+  it("returns the point count for the period", async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ downloads: 1234 }),
+    })
+    global.fetch = fetchMock
+
+    await expect(fetchDownloadsByPeriod("@scope/pkg", "last-week")).resolves.toBe(1234)
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "https://api.npmjs.org/downloads/point/last-week/%40scope%2Fpkg"
+    )
+  })
+
+  it("returns null on a failed response or network error", async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 404 })
+    await expect(fetchDownloadsByPeriod("nope", "last-week")).resolves.toBeNull()
+
+    global.fetch = jest.fn().mockRejectedValue(new Error("offline"))
+    await expect(fetchDownloadsByPeriod("nope", "last-week")).resolves.toBeNull()
+  })
+})
+
+describe("fetchDownloads", () => {
+  beforeEach(() => {
+    jest.spyOn(console, "warn").mockImplementation(() => {})
+  })
+  afterEach(() => jest.restoreAllMocks())
+
+  it("summarizes the yearly range and builds the weekly history", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ downloads: makeDays(14) }),
+    })
+
+    await expect(fetchDownloads("react")).resolves.toEqual({
+      weekly: 7,
+      monthly: 14,
+      yearly: 14,
+      history: [
+        { week: "day-0", downloads: 7 },
+        { week: "day-7", downloads: 7 },
+      ],
+    })
+  })
+
+  it("returns null when the range is empty or the request fails", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ downloads: [] }),
+    })
+    await expect(fetchDownloads("brand-new")).resolves.toBeNull()
+
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 })
+    await expect(fetchDownloads("react")).resolves.toBeNull()
   })
 })
